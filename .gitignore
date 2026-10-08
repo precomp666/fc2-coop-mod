@@ -1,0 +1,25 @@
+# Binary files (copyright/copyrighted)
+*.dll
+*.exe
+*.so
+*.pdb
+
+# Game install data (reinstalled on each PC)
+bin/
+Data_Win32/
+unins000.*
+
+# Build artifacts
+build/
+debug/
+release/
+
+# OS/System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.suo
+*.swp

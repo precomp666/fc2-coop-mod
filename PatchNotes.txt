@@ -1,0 +1,41 @@
+================================================================================
+
+Far Cry®2 v1.03 Update
+
+================================================================================
+
+If you had problems applying the 1st patch (1.01), please apply this cumulative patch. 
+
+STEAM users: Please wait until the patch is available through Steam. 
+
+General changes 
+
+ - A new server software has been created. Please consult the FC2ServerLauncher_ReadMe.txt file in the \bin folder for further documentation.
+ - Fixed a bug with the "Jackal tapes" accounting
+
+Multiplayer changes
+
+ - Made most weapons slightly more accurate
+ - Slightly extended length of the short-range damage category for most weapons
+ - Reduced the damage of all sniper weapons
+ - Reduced the damage of the MGL-140 grenades
+ - Reduced the damage of the M79 grenades
+ - Reduced the damage of the IED
+ - Reduced damage stim of the flamethrower by 1 step
+ - Added hardcore mode in the Advanced Options page. Weapons will do more damage and enemy names will be hidden after the invincibility period.
+ - Players are now displayed by XP order in the scoreboard.
+ - Allow players to rejoin the host after a ranked match.
+ - Allow the minimum player settings to be changed from the lobby.
+ - Allow force launch in ranked match.
+ - Fixed an issue with the launch map button which was displayed too low on some SDTV (480i - 4:3).
+ - Fixed a crash in menu browser when returning to a parent menu page while searching for a match.
+ - Fixed initial rank and XP replication. 
+ - Limit to one class reset per game.
+ - Now possible to play a map from the downloadable content with the dedicated server.
+ - Now possible to include an approved custom map in ranked games.
+ - Added a quick search option for ranked approved custom maps.
+ - Fix IED (improvise explosive devices) destruction
+ 
+ - Review game start conditions, there will be only 2 start conditions
+    - No vote in progress
+    - At least the minimum player required number must be ready
