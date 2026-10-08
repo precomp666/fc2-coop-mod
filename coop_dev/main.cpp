@@ -997,6 +997,92 @@ DWORD WINAPI CoopThread(LPVOID) {
                 }
             }
         }
+        // =============================================================
+        //  Milestone 5 (Animation & Action Replication - Co-op Testing)
+        // =============================================================
+
+        // Player actions state tracking
+        struct ActionState {
+            bool isFiringWeapon;
+            bool isCrouching;
+            bool isDead;
+        } g_actionState = {};
+
+        // Initialize action state (read from memory offsets if needed)
+        if (!g_actionState.isFiringWeapon && !g_actionState.isCrouching) {
+            g_actionState.isFiringWeapon = false;  // Default: not doing anything
+        }
+
+        // Check for weapon fire event
+        static volatile bool g_lastWasFiring = false;
+        static volatile bool g_isDead = false;
+        if (g_trackedPlayerAddr) {
+            uint8_t* pFlags = (uint8_t*)g_trackedPlayerAddr;  // Byte pointer for flag bits
+            bool currentlyFiring = (*pFlags & 0x01) != 0;  // Check weapon fire flag
+            bool isCrouching = (*pFlags & 0x02) != 0;      // Check crouch flag
+            if (currentlyFiring && !g_lastWasFiring) {
+                Log("[WEAPON_FIRE] Weapon fired!");
+                g_actionState.isFiringWeapon = true;
+            } else if (!currentlyFiring && g_lastWasFiring) {
+                g_actionState.isFiringWeapon = false;
+            }
+            g_lastWasFiring = currentlyFiring;
+
+            // Check death state
+            bool currentlyDead = (*pFlags & 0x10) != 0;
+            if (currentlyDead && !g_isDead) {
+                Log("[DEATH] Player died! Sending DEATH flag to remote.");
+                g_actionState.isDead = true;
+            } else if (!currentlyDead && g_isDead) {
+                Log("[REVIVE] Player revived! Resetting action flags.");
+                g_actionState.isDead = false;
+                g_actionState.isFiringWeapon = false;
+                g_actionState.isCrouching = false;
+            }
+            g_isDead = currentlyDead;
+
+            // Check crouch state
+            if (isCrouching && !g_actionState.isCrouching) {
+                Log("[STANCE] Going prone!");
+                g_actionState.isCrouching = true;
+            } else if (!isCrouching && g_actionState.isCrouching) {
+                g_actionState.isCrouching = false;
+            }
+            g_actionState.isCrouching = isCrouching;
+        }
+
+        // Action event log thread - separate from position sync thread
+        static volatile bool g_reqLogActionEvent = false;
+        static char g_lastLoggedAction[128] = { 0 };
+        
+        // Send action state to remote (every frame, with debounce)
+        if (tick % 5 == 0 && g_trackedPlayerAddr) {
+            // Build action packet: Flags | Frame Counter | Timestamp
+            uint32_t actionFlags = 0;
+            if (g_actionState.isFiringWeapon) actionFlags |= 0x01;
+            if (g_actionState.isCrouching)    actionFlags |= 0x02;
+            if (g_actionState.isDead)               actionFlags |= 0x04;
+
+            SOCKET rxSock = socket(AF_INET, SOCK_DGRAM, 0);
+            sockaddr_in remoteAddr;
+            memset(&remoteAddr, 0, sizeof(remoteAddr));
+            remoteAddr.sin_family = AF_INET;
+            remoteAddr.sin_port = htons(COOP_PORT_RX);
+
+            char buffer[128];
+            snprintf(buffer, sizeof(buffer), "ACTION:%u|%u|%.2f", actionFlags, (unsigned int)(tick / 60), (double)tick / 1000.0);
+            int len = strlen(buffer);
+
+            sendto(rxSock, buffer, len, 0, (sockaddr*)&remoteAddr, sizeof(remoteAddr));
+            closesocket(rxSock);
+
+            Log("[ACTION TX] Synced to remote: flags=%u frame=%u time=%.2f", actionFlags, tick / 60, tick / 1000.0);
+            
+            // Store last logged action for debouncing
+            char temp[32];
+            snprintf(temp, sizeof(temp), "ACTION:%u", actionFlags);
+            strncpy(g_lastLoggedAction, temp, 31);
+        }
     }
     return 0;
 }
