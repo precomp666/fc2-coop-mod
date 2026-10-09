@@ -1,0 +1,3 @@
+[*] Monitoring /home/host/Downloads/Far Cry 2/bin/FC2ServerLauncher.exe
+wine client error:0: version mismatch 938/962.Your wineserver binary was not upgraded correctly,or you have an older one somewhere in your PATH.
+[*] Server stopped. Log size: 19955 bytes

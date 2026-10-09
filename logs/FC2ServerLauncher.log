@@ -1,0 +1,414 @@
+0 - Network information was updated with code (E_SESSION_ERROR_SUCCESS)
+1 - --------------------------------------------
+2 - Login succeeded
+3 - Name                        : 
+4 - ID                          : 0x1639FFFFFFFF
+5 - Pad Index                   : 0
+6 - Logged in account flags     : 0x1X (EAccountFlags_Offline | )
+7 - Current client account flags: 0x1X (EAccountFlags_Offline | )
+8 - Client joined (, 0x1639FFFFFFFF, 192.168.1.117:0, PeerId: 0, Seq: 0, Data size : 0) - Session ID: 0x2980
+9 - --------------------------------------------
+10 - Session creation succeeded
+11 - Name              : 
+12 - ID                : 0x2980
+13 - IP                : 192.168.1.117:9001
+14 - Creator info      :  (0x1639FFFFFFFF)
+15 - Private ID        : 0
+16 - Is arbitrated     : false
+17 - Max public slots  : 16
+18 - Max private slots : 0
+19 - Type              : E_SESSION_TYPE_OFFLINE
+20 - --------------------------------------------
+21 - New value for server_name = FC2 Dedicated Server.
+22 - Set gamemode failed: can only do it in the game lobby
+23 - Set map_cycle failed: can only do it in the game lobby
+24 - New value for network_type = 1.
+25 - New value for ranked_match = 0.
+26 - New value for match_pb_enabled = 0.
+27 - New value for minplayers = 1.
+28 - New value for maxplayers = 16.
+29 - New value for teambalance = 1.
+30 - New value for teamswap = 0.
+31 - New value for friendly_fire = 1.
+32 - New value for joinprogress = 1.
+33 - New value for inroundtime = 900.
+34 - Unable to change setting value.
+35 - New value for detectPublicAddress = 1.
+36 - Setting scanPortStart : 9000
+37 - Setting server_type : 0
+38 - Setting scanPortRange : 1000
+39 - Setting frameRateCaps : 30
+40 - Setting lanBroadcastPort : 9004
+41 - Setting detectPublicAddress : Yes
+42 - Setting password : 0
+43 - Setting scanFreePorts : Yes
+44 - Setting wait_for_revive_time : 20
+45 - Setting teamcount : 2
+46 - Setting nat_type : 0
+47 - Setting postroundtime : 25
+48 - Setting waitready : 51
+49 - Setting revive_healing : 100
+50 - Setting weather_type : 4294967295
+51 - Setting friendly_fire : Yes
+52 - Setting map_type : 1
+53 - Setting teambalance : Yes
+54 - Setting map_cycle_limit : 15
+55 - Setting map_cycle : mp_01_dirtywork;mp_02_lastbastion;mp_03_pitbull;mp_04_loveshacks;mp_05_mudmaze;mp_06_cutbait;mp_07_riotcontrol;mp_08_coupdetat;mp_09_rumblestrip;mp_10_rustybeef;mp_11_farcry;mp_12_crudeawakening;mp_13_clearcut;mp_14_sandblasted
+56 - Setting teamswap : No
+57 - Setting warning_zone_death_timeout : 10
+58 - Setting lower_bound_rating : 0
+59 - Setting revive_endurance : 200
+60 - Setting match_extra_5 : 0
+61 - Setting match_extra_1 : 0
+62 - Setting maxplayers : 16
+63 - Setting minplayers : 1
+64 - Setting match_extra_4 : 0
+65 - Setting private_version : 0
+66 - Setting xp_penalty_loose : 0
+67 - Setting drop_weapon : 0
+68 - Setting join_in_round_respawn_time : 20
+69 - Setting player_pass : 
+70 - Setting reticuleRedTeamColor : 8527389
+71 - Setting reticuleTargetMinDistance : 100
+72 - Setting max_score : 20
+73 - Setting revive_enabled : 1
+74 - Setting reticuleBlueTeamColor : 4674182
+75 - Setting time_of_day : 4294967294
+76 - Setting time_resetpostround : 5
+77 - Setting time_timescale : 10
+78 - Setting map : 
+79 - Setting match_extra_6 : 0
+80 - Setting match_extra_2 : 0
+81 - Setting vote_throttle_time : 150
+82 - Setting flag_timeout_secs : 20
+83 - Setting match_region : 0
+84 - Setting reticuleTargetMaxDistance : 200
+85 - Setting preroundtime : 15
+86 - Setting xp_reward_win : 15
+87 - Setting team_kill_vote_threshold : 5
+88 - Setting autorelaunch : No
+89 - Setting map_upload_enabled : No
+90 - Setting respawntime : 5
+91 - Setting respawninvincibletime : 10
+92 - Setting dynamicLifeTime : 30
+93 - Setting upper_bound_rating : 0
+94 - Setting match_extra_3 : 0
+95 - Setting match_status : 0
+96 - Setting gamemode_cycle : 
+97 - Setting average_rating : 0
+98 - Setting admin_pass : 
+99 - Setting wave_respawn_time : 10
+100 - Setting privateplayers : 0
+101 - Setting inroundtime : 900
+102 - Setting network_type : 1
+103 - Setting force_ready_to_play : No
+104 - Setting wait_for_revive_time : 20
+105 - Setting teamcount : 2
+106 - Setting nat_type : 0
+107 - Setting postroundtime : 25
+108 - Setting waitready : 51
+109 - Setting revive_healing : 100
+110 - Setting weather_type : 4294967295
+111 - Setting friendly_fire : Yes
+112 - Setting map_type : 1
+113 - Setting teambalance : Yes
+114 - Setting map_cycle_limit : 15
+115 - Setting map_cycle : mp_01_dirtywork;mp_02_lastbastion;mp_03_pitbull;mp_04_loveshacks;mp_05_mudmaze;mp_06_cutbait;mp_07_riotcontrol;mp_08_coupdetat;mp_09_rumblestrip;mp_10_rustybeef;mp_11_farcry;mp_12_crudeawakening;mp_13_clearcut;mp_14_sandblasted
+116 - Setting teamswap : No
+117 - Setting warning_zone_death_timeout : 10
+118 - Setting lower_bound_rating : 0
+119 - Setting revive_endurance : 200
+120 - Setting match_extra_5 : 0
+121 - Setting match_extra_1 : 0
+122 - Setting maxplayers : 16
+123 - Setting minplayers : 1
+124 - Setting match_extra_4 : 0
+125 - Setting private_version : 0
+126 - Setting xp_penalty_loose : 0
+127 - Setting drop_weapon : 0
+128 - Setting join_in_round_respawn_time : 20
+129 - Setting player_pass : 
+130 - Setting reticuleRedTeamColor : 8527389
+131 - Setting reticuleTargetMinDistance : 100
+132 - Setting max_score : 1
+133 - Setting revive_enabled : 1
+134 - Setting reticuleBlueTeamColor : 4674182
+135 - Setting time_of_day : 4294967294
+136 - Setting time_resetpostround : 5
+137 - Setting time_timescale : 10
+138 - Setting map : 
+139 - Setting match_extra_6 : 0
+140 - Setting match_extra_2 : 0
+141 - Setting vote_throttle_time : 150
+142 - Setting match_region : 0
+143 - Setting reticuleTargetMaxDistance : 200
+144 - Setting xp_reward_win_multiplier_vip : 150
+145 - Setting preroundtime : 15
+146 - Setting xp_reward_win : 15
+147 - Setting team_kill_vote_threshold : 5
+148 - Setting autorelaunch : No
+149 - Setting map_upload_enabled : No
+150 - Setting respawntime : 5
+151 - Setting respawninvincibletime : 10
+152 - Setting dynamicLifeTime : 30
+153 - Setting upper_bound_rating : 0
+154 - Setting match_extra_3 : 0
+155 - Setting match_status : 0
+156 - Setting gamemode_cycle : 
+157 - Setting average_rating : 0
+158 - Setting admin_pass : 
+159 - Setting wave_respawn_time : 10
+160 - Setting privateplayers : 0
+161 - Setting inroundtime : 900
+162 - Setting network_type : 1
+163 - Setting onlineServicePort : 9001
+164 - Setting match_pb_enabled : No
+165 - Setting onlineCustomMapMaxUploadRate : 10240
+166 - Setting wait_for_revive_time : 20
+167 - Setting teamcount : 2
+168 - Setting nat_type : 0
+169 - Setting postroundtime : 25
+170 - Setting waitready : 51
+171 - Setting revive_healing : 100
+172 - Setting weather_type : 4294967295
+173 - Setting friendly_fire : Yes
+174 - Setting map_type : 1
+175 - Setting teambalance : Yes
+176 - Setting map_cycle_limit : 15
+177 - Setting map_cycle : mp_01_dirtywork;mp_02_lastbastion;mp_03_pitbull;mp_04_loveshacks;mp_05_mudmaze;mp_06_cutbait;mp_07_riotcontrol;mp_08_coupdetat;mp_09_rumblestrip;mp_10_rustybeef;mp_11_farcry;mp_12_crudeawakening;mp_13_clearcut;mp_14_sandblasted
+178 - Setting teamswap : No
+179 - Setting warning_zone_death_timeout : 10
+180 - Setting lower_bound_rating : 0
+181 - Setting revive_endurance : 200
+182 - Setting match_extra_5 : 0
+183 - Setting match_extra_1 : 0
+184 - Setting maxplayers : 16
+185 - Setting minplayers : 1
+186 - Setting match_extra_4 : 0
+187 - Setting private_version : 0
+188 - Setting xp_penalty_loose : 0
+189 - Setting drop_weapon : 0
+190 - Setting join_in_round_respawn_time : 20
+191 - Setting player_pass : 
+192 - Setting reticuleRedTeamColor : 8527389
+193 - Setting reticuleTargetMinDistance : 100
+194 - Setting max_score : 20
+195 - Setting revive_enabled : 1
+196 - Setting reticuleBlueTeamColor : 4674182
+197 - Setting time_of_day : 4294967294
+198 - Setting time_resetpostround : 5
+199 - Setting time_timescale : 10
+200 - Setting map : 
+201 - Setting match_extra_6 : 0
+202 - Setting match_extra_2 : 0
+203 - Setting vote_throttle_time : 150
+204 - Setting match_region : 0
+205 - Setting reticuleTargetMaxDistance : 200
+206 - Setting preroundtime : 15
+207 - Setting xp_reward_win : 5
+208 - Setting team_kill_vote_threshold : 5
+209 - Setting autorelaunch : No
+210 - Setting map_upload_enabled : No
+211 - Setting respawntime : 5
+212 - Setting respawninvincibletime : 10
+213 - Setting dynamicLifeTime : 30
+214 - Setting upper_bound_rating : 0
+215 - Setting match_extra_3 : 0
+216 - Setting match_status : 0
+217 - Setting gamemode_cycle : 
+218 - Setting average_rating : 0
+219 - Setting admin_pass : 
+220 - Setting wave_respawn_time : 10
+221 - Setting privateplayers : 0
+222 - Setting inroundtime : 900
+223 - Setting network_type : 1
+224 - Setting map_sharing : Yes
+225 - Setting joinprogress : Yes
+226 - Setting wait_for_revive_time : 20
+227 - Setting nat_type : 0
+228 - Setting postroundtime : 25
+229 - Setting waitready : 51
+230 - Setting revive_healing : 100
+231 - Setting weather_type : 4294967295
+232 - Setting map_type : 1
+233 - Setting map_cycle_limit : 15
+234 - Setting map_cycle : mp_01_dirtywork;mp_02_lastbastion;mp_03_pitbull;mp_04_loveshacks;mp_05_mudmaze;mp_06_cutbait;mp_07_riotcontrol;mp_08_coupdetat;mp_09_rumblestrip;mp_10_rustybeef;mp_11_farcry;mp_12_crudeawakening;mp_13_clearcut;mp_14_sandblasted
+235 - Setting warning_zone_death_timeout : 10
+236 - Setting lower_bound_rating : 0
+237 - Setting revive_endurance : 200
+238 - Setting match_extra_5 : 0
+239 - Setting match_extra_1 : 0
+240 - Setting maxplayers : 16
+241 - Setting minplayers : 1
+242 - Setting match_extra_4 : 0
+243 - Setting private_version : 0
+244 - Setting xp_penalty_loose : 0
+245 - Setting drop_weapon : 0
+246 - Setting join_in_round_respawn_time : 20
+247 - Setting player_pass : 
+248 - Setting reticuleRedTeamColor : 8527389
+249 - Setting reticuleTargetMinDistance : 100
+250 - Setting max_score : 20
+251 - Setting revive_enabled : 0
+252 - Setting reticuleBlueTeamColor : 4674182
+253 - Setting time_of_day : 4294967294
+254 - Setting time_resetpostround : 5
+255 - Setting time_timescale : 10
+256 - Setting map : 
+257 - Setting match_extra_6 : 0
+258 - Setting match_extra_2 : 0
+259 - Setting vote_throttle_time : 150
+260 - Setting match_region : 0
+261 - Setting reticuleTargetMaxDistance : 200
+262 - Setting preroundtime : 15
+263 - Setting autorelaunch : No
+264 - Setting map_upload_enabled : No
+265 - Setting respawntime : 5
+266 - Setting respawninvincibletime : 10
+267 - Setting dynamicLifeTime : 30
+268 - Setting upper_bound_rating : 0
+269 - Setting match_extra_3 : 0
+270 - Setting match_status : 0
+271 - Setting gamemode_cycle : 
+272 - Setting average_rating : 0
+273 - Setting admin_pass : 
+274 - Setting privateplayers : 0
+275 - Setting inroundtime : 900
+276 - Setting network_type : 1
+277 - Setting ranked_match : 0
+278 - Setting onlineEnginePort : 9000
+279 - Setting lobbytime : 0
+280 - Setting start_rank : 1
+281 - Setting use_pickup_containers : 1
+282 - Setting maxUploadOnline : 768
+283 - Setting gamemode : FCXTeamDeathMatch
+284 - Setting punkbuster_enabled : No
+285 - Setting matchPassword : 
+286 - Setting hardcore_mode : No
+287 - Setting server_name : FC2 Dedicated Server
+288 - Setting allow_voting : Yes
+289 - Setting max_upload_rate : 0
+290 - Setting fileTransferClientPort : 9003
+291 - Setting remotePassword : 
+292 - Setting fileTransferHostPort : 9002
+293 - MESSAGE BOX: Logging in…
+294 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+295 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+296 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+297 - MESSAGE BOX: Logging in…
+298 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+299 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+300 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+301 - MESSAGE BOX: Logging in…
+302 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+303 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+304 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+305 - MESSAGE BOX: Logging in…
+306 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+307 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+308 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+309 - MESSAGE BOX: Logging in…
+310 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+311 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+312 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+313 - MESSAGE BOX: Logging in…
+314 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+315 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+316 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+317 - MESSAGE BOX: Logging in…
+318 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+319 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+320 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+321 - MESSAGE BOX: Logging in…
+322 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+323 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+324 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+325 - MESSAGE BOX: Logging in…
+326 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+327 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+328 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+329 - MESSAGE BOX: Logging in…
+330 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+331 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+332 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+333 - MESSAGE BOX: Logging in…
+334 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+335 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+336 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+337 - MESSAGE BOX: Logging in…
+338 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+339 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+340 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+341 - MESSAGE BOX: Logging in…
+342 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+343 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+344 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+345 - MESSAGE BOX: Logging in…
+346 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+347 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+348 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+349 - MESSAGE BOX: Logging in…
+350 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+351 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+352 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+353 - MESSAGE BOX: Logging in…
+354 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+355 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+356 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+357 - MESSAGE BOX: Logging in…
+358 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+359 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+360 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+361 - MESSAGE BOX: Logging in…
+362 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+363 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+364 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+365 - MESSAGE BOX: Logging in…
+366 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+367 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+368 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+369 - MESSAGE BOX: Logging in…
+370 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+371 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+372 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+373 - MESSAGE BOX: Logging in…
+374 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+375 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+376 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+377 - MESSAGE BOX: Logging in…
+378 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+379 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+380 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+381 - MESSAGE BOX: Logging in…
+382 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+383 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+384 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+385 - MESSAGE BOX: Logging in…
+386 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+387 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+388 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+389 - MESSAGE BOX: Logging in…
+390 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+391 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+392 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+393 - MESSAGE BOX: Logging in…
+394 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+395 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+396 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+397 - MESSAGE BOX: Logging in…
+398 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+399 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+400 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+401 - MESSAGE BOX: Logging in…
+402 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+403 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+404 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+405 - MESSAGE BOX: Logging in…
+406 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+407 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+408 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+409 - MESSAGE BOX: Logging in…
+410 - Login failed with error : E_SESSION_ERROR_CORE_TASK_TIMEOUT
+411 - CAccountService::OnLogin(): Client=24438363914239 Result=E_SESSION_ERROR_CORE_TASK_TIMEOUT
+412 - MESSAGE BOX: The Far Cry® 2 server is not available at this time. Please try again later.
+413 - MESSAGE BOX: Logging in…
