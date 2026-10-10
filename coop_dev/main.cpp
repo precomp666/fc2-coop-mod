@@ -396,22 +396,57 @@ void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, floa
         return;
     }
 
-    // Get function pointers from vtable
+    // Try multiple vtable index combinations (different entity types may have different layouts)
+    struct VTableLayout {
+        int invalidateCacheIdx;
+        int setPositionIdx;
+        int setRotationIdx;
+        const char* name;
+    };
+    
+    static const VTableLayout layouts[] = {
+        {8, 12, 13, "standard"},
+        {7, 11, 12, "alt1"},
+        {9, 13, 14, "alt2"},
+        {6, 10, 11, "alt3"},
+        {10, 14, 15, "alt4"},
+    };
+    
     typedef void (__thiscall *fn_InvalidateCache_vt)(void*);
     typedef void (__thiscall *fn_SetPosition_vt)(void*, const Vec3*, uint32_t);
     typedef void (__thiscall *fn_SetRotation_vt)(void*, const Vec3*, uint32_t);
-
-    fn_InvalidateCache_vt pInvalidateCache = (fn_InvalidateCache_vt)vtable[8];
-    fn_SetPosition_vt pSetPosition = (fn_SetPosition_vt)vtable[12];
-    fn_SetRotation_vt pSetRotation = (fn_SetRotation_vt)vtable[13];
-
-    // Validate vtable function pointers
-    if (!pInvalidateCache || !pSetPosition || !pSetRotation ||
-        !SafeReadPtr((void*)pInvalidateCache, 1) ||
-        !SafeReadPtr((void*)pSetPosition, 1) ||
-        !SafeReadPtr((void*)pSetRotation, 1)) {
-        Log("[SETPOS] Vtable function pointers invalid: IC=%p SP=%p SR=%p vt[8]=%p vt[12]=%p vt[13]=%p", 
-            pInvalidateCache, pSetPosition, pSetRotation, vtable[8], vtable[12], vtable[13]);
+    
+    fn_InvalidateCache_vt pInvalidateCache = nullptr;
+    fn_SetPosition_vt pSetPosition = nullptr;
+    fn_SetRotation_vt pSetRotation = nullptr;
+    bool foundValidLayout = false;
+    
+    for (const auto& layout : layouts) {
+        if (!SafeReadPtr(vtable, sizeof(void*) * (layout.setRotationIdx + 1))) continue;
+        
+        fn_InvalidateCache_vt ic = (fn_InvalidateCache_vt)vtable[layout.invalidateCacheIdx];
+        fn_SetPosition_vt sp = (fn_SetPosition_vt)vtable[layout.setPositionIdx];
+        fn_SetRotation_vt sr = (fn_SetRotation_vt)vtable[layout.setRotationIdx];
+        
+        if (ic && sp && sr &&
+            SafeReadPtr((void*)ic, 1) &&
+            SafeReadPtr((void*)sp, 1) &&
+            SafeReadPtr((void*)sr, 1)) {
+            pInvalidateCache = ic;
+            pSetPosition = sp;
+            pSetRotation = sr;
+            Log("[SETPOS] Found valid vtable layout '%s': IC=%p SP=%p SR=%p", 
+                layout.name, ic, sp, sr);
+            foundValidLayout = true;
+            break;
+        }
+    }
+    
+    if (!foundValidLayout) {
+        Log("[SETPOS] No valid vtable layout found. Tried all known layouts.");
+        Log("[SETPOS] Raw vtable[6-15]: %p %p %p %p %p %p %p %p %p %p",
+            vtable[6], vtable[7], vtable[8], vtable[9], vtable[10], 
+            vtable[11], vtable[12], vtable[13], vtable[14], vtable[15]);
         if (g_p2EntityPtr.load() == pEntity) {
             g_p2BuddySpawned.store(false);
             g_p2EntityPtr.store(nullptr);
