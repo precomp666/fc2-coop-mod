@@ -15,9 +15,9 @@ for tool_dir in "$HOME/tools"/llvm-mingw*; do
     fi
 done
 
-COMPILER="i686-w64-mingw32-clang++"
+COMPILER="i686-w64-mingw32-g++"
 if ! command -v "$COMPILER" &> /dev/null; then
-    COMPILER="i686-w64-mingw32-g++"
+    COMPILER="i686-w64-mingw32-clang++"
 fi
 
 if ! command -v "$COMPILER" &> /dev/null; then

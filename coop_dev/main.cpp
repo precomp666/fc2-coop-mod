@@ -7,10 +7,28 @@
 #include <vector>
 #include <cmath>
 #include <cstdint>
+#include <stdarg.h>
+#include <cstring>
+#include <cstdio>
+#include <atomic>
+#include <mutex>
 
+// =============================================================
+//  Thread Safety & Synchronization Primitives
+// =============================================================
+static CRITICAL_SECTION g_cs;
+static bool g_csInitialized = false;
 static FILE* g_logFile = NULL;
 
+// Thread-safe logging
 void Log(const char* format, ...) {
+    if (!g_csInitialized) {
+        InitializeCriticalSection(&g_cs);
+        g_csInitialized = true;
+    }
+
+    EnterCriticalSection(&g_cs);
+
     if (!g_logFile) {
         g_logFile = fopen("fc2_coop.log", "a");
     }
@@ -26,6 +44,45 @@ void Log(const char* format, ...) {
         fprintf(g_logFile, "\n");
         fflush(g_logFile);
     }
+
+    LeaveCriticalSection(&g_cs);
+}
+
+// Safe pointer validation using VirtualQuery (replaces IsBadReadPtr)
+inline bool SafeReadPtr(const void* ptr, size_t size) {
+    if (!ptr || size == 0) return false;
+    
+    MEMORY_BASIC_INFORMATION mbi;
+    if (!VirtualQuery(ptr, &mbi, sizeof(mbi))) return false;
+    if (mbi.State != MEM_COMMIT) return false;
+    if (!(mbi.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY))) return false;
+    
+    uintptr_t start = (uintptr_t)ptr;
+    uintptr_t end = start + size - 1;
+    if (end < start) return false;
+    
+    if (!VirtualQuery((void*)end, &mbi, sizeof(mbi))) return false;
+    if (mbi.State != MEM_COMMIT) return false;
+    if (!(mbi.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY))) return false;
+    
+    return true;
+}
+
+// Safe pointer validation for single value reads
+template<typename T>
+inline bool SafeReadValue(const T* ptr, T& out) {
+    if (!ptr) return false;
+    if (!SafeReadPtr(ptr, sizeof(T))) return false;
+    out = *ptr;
+    return true;
+}
+
+// Overload for void** (reading a pointer to pointer)
+inline bool SafeReadValue(const void* const* ptr, void*& out) {
+    if (!ptr) return false;
+    if (!SafeReadPtr(ptr, sizeof(void*))) return false;
+    out = const_cast<void*>(*ptr);
+    return true;
 }
 
 // =============================================================
@@ -52,21 +109,41 @@ struct CoopPacket {
 
 static SOCKET g_txSocket = INVALID_SOCKET;
 static sockaddr_in g_txBroadcast, g_txLocal;
-static uint32_t g_txSeq = 0;
+static std::atomic<uint32_t> g_txSeq(0);
 
-// Remote player state
-static volatile float g_remoteX = 0, g_remoteY = 0, g_remoteZ = 0;
-static volatile DWORD g_remoteLastTick = 0;
-static volatile bool g_hasRemotePlayer = false;
+// Remote player state - atomic for thread safety
+static std::atomic<float> g_remoteX(0), g_remoteY(0), g_remoteZ(0);
+static std::atomic<DWORD> g_remoteLastTick(0);
+static std::atomic<bool> g_hasRemotePlayer(false);
 
 // Test marker state
-static volatile bool g_testMarkerActive = true;
+static std::atomic<bool> g_testMarkerActive(true);
 static Vec3 g_testMarkerPos = { 0, 0, 0 };
-static bool g_testMarkerInitialized = false;
+static std::atomic<bool> g_testMarkerInitialized(false);
 
 // Tracked Player & Camera context
-static uintptr_t g_trackedPlayerAddr = 0;
-static bool g_trackingEnabled = true;
+static std::atomic<uintptr_t> g_trackedPlayerAddr(0);
+static std::atomic<bool> g_trackingEnabled(true);
+
+// Lua callback registration - atomic to prevent race conditions
+static std::atomic<bool> g_luaCallbacksRegistered(false);
+
+// Buddy entity state
+static std::atomic<uint64_t> g_p2EntityId(0);
+static std::atomic<void*> g_p2EntityPtr(nullptr);
+static std::atomic<bool> g_p2BuddySpawned(false);
+static std::atomic<int> g_spawnGeneration(0);  // Increment on each spawn attempt
+
+// Spawn/Teleport request flags (set from CoopThread, processed in HookedPresent)
+static std::atomic<bool> g_reqSpawnBuddy(false);
+static std::atomic<bool> g_reqTeleportBuddy(false);
+
+// Selected archetype index
+static std::atomic<int> g_selectedArchetypeIdx(0);
+
+// Thread handles for cleanup
+static HANDLE g_receiverThreadHandle = NULL;
+static std::atomic<bool> g_shutdownRequested(false);
 
 // =============================================================
 //  Dunia Engine Script & Entity Interfaces (Option A)
@@ -101,23 +178,15 @@ static const char* g_buddyArchetypes[] = {
     "BUDDY_Quarbani_Singh"
 };
 static const int g_numArchetypes = sizeof(g_buddyArchetypes) / sizeof(g_buddyArchetypes[0]);
-static int g_selectedArchetypeIdx = 0; // Hakim Echebbi by default
-
-// Spawned Player 2 Entity state
-static uint64_t g_p2EntityId = 0;
-static void*    g_p2EntityPtr = nullptr;
-static bool     g_p2BuddySpawned = false;
-static bool     g_luaCallbacksRegistered = false;
-static volatile bool g_reqSpawnBuddy = false;
-static volatile bool g_reqTeleportBuddy = false;
 
 void* GetLuaState() {
     uintptr_t scriptSysAddr = 0x11606728;
-    if (IsBadReadPtr((const void*)scriptSysAddr, sizeof(void*))) return nullptr;
-    uintptr_t* pScriptSys = *(uintptr_t**)scriptSysAddr;
-    if (!pScriptSys || IsBadReadPtr((const void*)pScriptSys, sizeof(void*))) return nullptr;
-    void* L = (void*)(*pScriptSys);
-    if (!L || IsBadReadPtr((const void*)L, sizeof(void*))) return nullptr;
+    uintptr_t pScriptSys = 0;
+    if (!SafeReadValue((const uintptr_t*)scriptSysAddr, pScriptSys)) return nullptr;
+    if (!pScriptSys) return nullptr;
+    void* L = nullptr;
+    if (!SafeReadValue((const void**)pScriptSys, L)) return nullptr;
+    if (!L) return nullptr;
     return L;
 }
 
@@ -146,18 +215,19 @@ int __cdecl MyBuddySpawnedHandler(void* L) {
     if (strId) {
         uint64_t id = 0;
         if (sscanf(strId, "%llu", &id) == 1 && id != 0 && id != 0xFFFFFFFFFFFFFFFFULL) {
-            g_p2EntityId = id;
+            g_p2EntityId.store(id);
             Log("[BUDDY-SPAWN] Received Valid Spawn ID: %s (0x%016llX)", strId, id);
 
             void* pMgr = *(void**)0x11644E80;
-            if (pMgr && !IsBadReadPtr(pMgr, sizeof(void*))) {
+            if (pMgr && SafeReadPtr(pMgr, sizeof(void*))) {
                 uintptr_t smartPtr = 0;
                 g_GetEntityFromId(pMgr, &smartPtr, (uint32_t)(id & 0xFFFFFFFF), (uint32_t)(id >> 32));
-                if (smartPtr && !IsBadReadPtr((const void*)smartPtr, 0x10)) {
-                    g_p2EntityPtr = *(void**)(smartPtr + 0x0C);
-                    if (g_p2EntityPtr) {
-                        g_p2BuddySpawned = true;
-                        Log("[BUDDY-SPAWN] SUCCESS! CEntity pointer resolved: 0x%08X", (uintptr_t)g_p2EntityPtr);
+                if (smartPtr && SafeReadPtr((const void*)smartPtr, 0x10)) {
+                    void* pEntity = nullptr;
+                    if (SafeReadValue((const void**)(smartPtr + 0x0C), pEntity) && pEntity) {
+                        g_p2EntityPtr.store(pEntity);
+                        g_p2BuddySpawned.store(true);
+                        Log("[BUDDY-SPAWN] SUCCESS! CEntity pointer resolved: 0x%08X", (uintptr_t)pEntity);
                     } else {
                         Log("[BUDDY-SPAWN] Warning: CEntity pointer in smartPtr was NULL");
                     }
@@ -181,53 +251,68 @@ void ExecuteSpawnBuddy(float x, float y, float z) {
         return;
     }
 
-    if (!g_luaCallbacksRegistered) {
+    // Atomic callback registration to prevent race condition
+    bool expected = false;
+    if (g_luaCallbacksRegistered.compare_exchange_strong(expected, true)) {
         g_RegisterLuaGlobal(nullptr, "OnBuddySpawned", (void*)&MyBuddySpawnedHandler);
         g_RegisterLuaGlobal(nullptr, "OnPlayerReport", (void*)&OnPlayerReportHandler);
         g_RegisterLuaGlobal(nullptr, "ModLog", (void*)&ModLogHandler);
-        g_luaCallbacksRegistered = true;
         Log("[LUA] Registered callbacks (OnBuddySpawned, OnPlayerReport, ModLog)");
     }
 
+    // Increment spawn generation to invalidate any pending callbacks from previous spawns
+    int currentGen = g_spawnGeneration.fetch_add(1) + 1;
+
     // 1. Query Local Player name if not yet discovered
     if (g_localPlayerEntityName[0] == '\0') {
-        const char* qScript = 
+        const char* qScript =
             "local myId = GetLocalPlayerId(); "
             "if myId and myId ~= '18446744073709551615' then "
             "  local myName = GetEntityName(myId); "
             "  OnPlayerReport(myName); "
             "end";
-        g_lua_dostring(L, qScript);
+        int result = g_lua_dostring(L, qScript);
+        if (result != 0) {
+            const char* err = g_lua_tostring(L, -1);
+            Log("[SPAWN] Lua error querying player name: %s", err ? err : "unknown");
+        }
     }
 
     // 2. Remove previously spawned buddy entity if any
-    if (g_p2BuddySpawned && g_p2EntityId != 0 && g_p2EntityId != 0xFFFFFFFFFFFFFFFFULL) {
+    if (g_p2BuddySpawned.load() && g_p2EntityId.load() != 0 && g_p2EntityId.load() != 0xFFFFFFFFFFFFFFFFULL) {
         char rmScript[128];
-        snprintf(rmScript, sizeof(rmScript), "RemoveEntity('%llu');", g_p2EntityId);
-        g_lua_dostring(L, rmScript);
-        g_p2BuddySpawned = false;
-        g_p2EntityPtr = nullptr;
-        g_p2EntityId = 0;
+        snprintf(rmScript, sizeof(rmScript), "RemoveEntity('%llu');", g_p2EntityId.load());
+        int result = g_lua_dostring(L, rmScript);
+        if (result != 0) {
+            const char* err = g_lua_tostring(L, -1);
+            Log("[SPAWN] Lua error removing old entity: %s", err ? err : "unknown");
+        }
+        g_p2BuddySpawned.store(false);
+        g_p2EntityPtr.store(nullptr);
+        g_p2EntityId.store(0);
     }
 
     // 3. Try candidates until one spawns successfully
     const char* candidates[16];
     int candCount = 0;
+    const int MAX_CANDIDATES = 16;
 
-    if (g_localPlayerEntityName[0] != '\0') {
+    if (g_localPlayerEntityName[0] != '\0' && candCount < MAX_CANDIDATES) {
         candidates[candCount++] = g_localPlayerEntityName;
     }
-    candidates[candCount++] = "Hakim_Echebbi";
-    candidates[candCount++] = "Marty_Alencar";
-    candidates[candCount++] = "Paul_Ferenc";
-    candidates[candCount++] = "Warren_Clyde";
-    candidates[candCount++] = "Josip_Idromeno";
-    candidates[candCount++] = "BUDDY_Hakim_Echebbi";
-    candidates[candCount++] = "BUDDY_Marty_Alencar";
-    candidates[candCount++] = "enemy_archetypes.Red_Faction.Assault_Caucasian";
-    candidates[candCount++] = "enemy_archetypes.Blue_Faction.Assault_Caucasian";
+    // Only buddy archetypes - NO enemy archetypes!
+    if (candCount < MAX_CANDIDATES) candidates[candCount++] = "Hakim_Echebbi";
+    if (candCount < MAX_CANDIDATES) candidates[candCount++] = "Marty_Alencar";
+    if (candCount < MAX_CANDIDATES) candidates[candCount++] = "Paul_Ferenc";
+    if (candCount < MAX_CANDIDATES) candidates[candCount++] = "Warren_Clyde";
+    if (candCount < MAX_CANDIDATES) candidates[candCount++] = "Josip_Idromeno";
+    if (candCount < MAX_CANDIDATES) candidates[candCount++] = "BUDDY_Hakim_Echebbi";
+    if (candCount < MAX_CANDIDATES) candidates[candCount++] = "BUDDY_Marty_Alencar";
+    if (candCount < MAX_CANDIDATES) candidates[candCount++] = "BUDDY_Paul_Ferenc";
+    if (candCount < MAX_CANDIDATES) candidates[candCount++] = "BUDDY_Warren_Clyde";
+    if (candCount < MAX_CANDIDATES) candidates[candCount++] = "BUDDY_Josip_Idromeno";
 
-    for (int i = 0; i < candCount && !g_p2BuddySpawned; i++) {
+    for (int i = 0; i < candCount && !g_p2BuddySpawned.load(); i++) {
         const char* arch = candidates[i];
         char script[256];
         snprintf(script, sizeof(script),
@@ -238,28 +323,34 @@ void ExecuteSpawnBuddy(float x, float y, float z) {
             arch, x, y, z);
 
         Log("[SPAWN-TRY] Trying archetype '%s' at (%.1f, %.1f, %.1f)...", arch, x, y, z);
-        g_lua_dostring(L, script);
-        if (g_p2BuddySpawned) {
-            Log("[SPAWN-SUCCESS] Archetype '%s' spawned successfully! EntityPtr=0x%08X", arch, (uintptr_t)g_p2EntityPtr);
+        int result = g_lua_dostring(L, script);
+        if (result != 0) {
+            const char* err = g_lua_tostring(L, -1);
+            Log("[SPAWN] Lua error for archetype '%s': %s", arch, err ? err : "unknown");
+        }
+        if (g_p2BuddySpawned.load()) {
+            Log("[SPAWN-SUCCESS] Archetype '%s' spawned successfully! EntityPtr=0x%08X", arch, (uintptr_t)g_p2EntityPtr.load());
             break;
         }
     }
 
-    if (!g_p2BuddySpawned) {
+    if (!g_p2BuddySpawned.load()) {
         Log("[SPAWN-NOTICE] Archetypes did not spawn immediately, trying CBuddiesManager...");
-        const char* bmScript = 
+        const char* bmScript =
             "if CBuddiesManager and CBuddiesManager.SpawnPrimaryBuddy then "
             "  local bid = CBuddiesManager:SpawnPrimaryBuddy('default', 'none', %.2f, %.2f, %.2f); "
             "  if bid and bid ~= '18446744073709551615' then OnBuddySpawned(bid); end "
             "end";
         char bmBuf[256];
         snprintf(bmBuf, sizeof(bmBuf), bmScript, x, y, z);
-        g_lua_dostring(L, bmBuf);
+        int result = g_lua_dostring(L, bmBuf);
+        if (result != 0) {
+            const char* err = g_lua_tostring(L, -1);
+            Log("[SPAWN] Lua error in CBuddiesManager fallback: %s", err ? err : "unknown");
+        }
     }
 }
-
 void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, float pitchRad = 0, float rollRad = 0, float yawRad = 0) {
-    if (!pEntity || IsBadReadPtr(pEntity, 0x100)) return;
 
     Vec3 pos = { x, y, z };
     Vec3 rot = { pitchRad, rollRad, yawRad };
@@ -277,7 +368,7 @@ bool IsValidCoord(float x, float y, float z) {
 }
 
 // =============================================================
-//  Auto-Locate Active Dunia Camera Context
+//  Auto-Locate Active Dunia Camera Context (SafeReadPtr-safe)
 // =============================================================
 bool AutoLocateCamera() {
     HANDLE hp = GetCurrentProcess();
@@ -285,6 +376,12 @@ bool AutoLocateCamera() {
         uintptr_t addr = (page << 16) | 0x9C6C;
         float dims[2];
         SIZE_T br = 0;
+        
+        // Validate memory before reading
+        if (!SafeReadPtr((void*)(addr - 0x20), sizeof(dims))) continue;
+        if (!SafeReadPtr((void*)addr, sizeof(float) * 3)) continue;
+        if (!SafeReadPtr((void*)(addr + 0x10), sizeof(float) * 3)) continue;
+        
         if (ReadProcessMemory(hp, (LPCVOID)(addr - 0x20), dims, sizeof(dims), &br) && br == sizeof(dims)) {
             if (dims[0] >= 640.0f && dims[0] <= 7680.0f && dims[1] >= 480.0f && dims[1] <= 4320.0f) {
                 float pos[3];
@@ -294,7 +391,7 @@ bool AutoLocateCamera() {
                         if (ReadProcessMemory(hp, (LPCVOID)(addr + 0x10), fwd, sizeof(fwd), &br) && br == sizeof(fwd)) {
                             float flen = fwd[0]*fwd[0] + fwd[1]*fwd[1] + fwd[2]*fwd[2];
                             if (flen >= 0.85f && flen <= 1.15f) {
-                                g_trackedPlayerAddr = addr;
+                                g_trackedPlayerAddr.store(addr);
                                 Log("[CAMERA-LOCK] Active camera found at 0x%08X: Pos (%.1f, %.1f, %.1f) Screen %.0fx%.0f",
                                     (DWORD)addr, pos[0], pos[1], pos[2], dims[0], dims[1]);
                                 return true;
@@ -309,19 +406,26 @@ bool AutoLocateCamera() {
 }
 
 // =============================================================
-//  World-To-Screen Projection
+//  World-To-Screen Projection (SafeReadPtr-safe)
 // =============================================================
 bool WorldToScreen(float wx, float wy, float wz, float& sx, float& sy, float& dist, bool& isBehind) {
-    if (!g_trackedPlayerAddr) {
+    uintptr_t addr = g_trackedPlayerAddr.load();
+    if (!addr) {
         if (!AutoLocateCamera()) return false;
+        addr = g_trackedPlayerAddr.load();
+        if (!addr) return false;
     }
 
     HANDLE hp = GetCurrentProcess();
     SIZE_T br = 0;
 
     float camData[7]; // px, py, pz, proj_factor, fx, fy, fz
-    if (!ReadProcessMemory(hp, (LPCVOID)g_trackedPlayerAddr, camData, sizeof(camData), &br) || br != sizeof(camData)) {
-        g_trackedPlayerAddr = 0;
+    if (!SafeReadPtr((void*)addr, sizeof(camData))) {
+        g_trackedPlayerAddr.store(0);
+        return false;
+    }
+    if (!ReadProcessMemory(hp, (LPCVOID)addr, camData, sizeof(camData), &br) || br != sizeof(camData)) {
+        g_trackedPlayerAddr.store(0);
         return false;
     }
 
@@ -332,22 +436,27 @@ bool WorldToScreen(float wx, float wy, float wz, float& sx, float& sy, float& di
     Vec3 fwd = { camData[4], camData[5], camData[6] };
 
     if (!IsValidCoord(px, py, pz)) {
-        g_trackedPlayerAddr = 0;
+        g_trackedPlayerAddr.store(0);
         return false;
     }
 
     Vec3 right, up;
-    if (!ReadProcessMemory(hp, (LPCVOID)(g_trackedPlayerAddr + 0x80), &right, sizeof(Vec3), &br) || br != sizeof(Vec3))
+    if (!SafeReadPtr((void*)(addr + 0x80), sizeof(Vec3)) || !SafeReadPtr((void*)(addr + 0x90), sizeof(Vec3))) {
         return false;
-    if (!ReadProcessMemory(hp, (LPCVOID)(g_trackedPlayerAddr + 0x90), &up, sizeof(Vec3), &br) || br != sizeof(Vec3))
+    }
+    if (!ReadProcessMemory(hp, (LPCVOID)(addr + 0x80), &right, sizeof(Vec3), &br) || br != sizeof(Vec3))
+        return false;
+    if (!ReadProcessMemory(hp, (LPCVOID)(addr + 0x90), &up, sizeof(Vec3), &br) || br != sizeof(Vec3))
         return false;
 
     float sw = 1920.0f, sh = 1080.0f;
     float dims[2];
-    if (ReadProcessMemory(hp, (LPCVOID)(g_trackedPlayerAddr - 0x20), dims, sizeof(dims), &br) && br == sizeof(dims)) {
-        if (dims[0] > 200.0f && dims[1] > 200.0f) {
-            sw = dims[0];
-            sh = dims[1];
+    if (SafeReadPtr((void*)(addr - 0x20), sizeof(dims))) {
+        if (ReadProcessMemory(hp, (LPCVOID)(addr - 0x20), dims, sizeof(dims), &br) && br == sizeof(dims)) {
+            if (dims[0] > 200.0f && dims[1] > 200.0f) {
+                sw = dims[0];
+                sh = dims[1];
+            }
         }
     }
 
@@ -571,28 +680,31 @@ void Render3DMarker(IDirect3DDevice9* dev, float wx, float wy, float wz, DWORD p
 void RenderCoopOverlay(IDirect3DDevice9* dev) {
     if (!dev) return;
 
-    if (!g_trackedPlayerAddr) {
+    uintptr_t addr = g_trackedPlayerAddr.load();
+    if (!addr) {
         if (!AutoLocateCamera()) return;
+        addr = g_trackedPlayerAddr.load();
+        if (!addr) return;
     }
 
     // Auto-initialize test marker if not done yet
-    if (g_testMarkerActive && !g_testMarkerInitialized && g_trackedPlayerAddr) {
+    if (g_testMarkerActive.load() && !g_testMarkerInitialized.load() && addr) {
         float cam[7]; SIZE_T brRead;
-        if (ReadProcessMemory(GetCurrentProcess(), (LPCVOID)g_trackedPlayerAddr, cam, sizeof(cam), &brRead) && brRead == sizeof(cam)) {
+        if (ReadProcessMemory(GetCurrentProcess(), (LPCVOID)addr, cam, sizeof(cam), &brRead) && brRead == sizeof(cam)) {
             if (IsValidCoord(cam[0], cam[1], cam[2])) {
                 g_testMarkerPos.x = cam[0] + cam[4] * 15.0f;
                 g_testMarkerPos.y = cam[1] + cam[5] * 15.0f;
                 g_testMarkerPos.z = cam[2] + cam[6] * 15.0f;
-                g_testMarkerInitialized = true;
+                g_testMarkerInitialized.store(true);
                 Log("[AUTO-INIT] Test marker placed 15m ahead at (%.1f, %.1f, %.1f)",
                     g_testMarkerPos.x, g_testMarkerPos.y, g_testMarkerPos.z);
             }
         }
     }
 
-    if (g_hasRemotePlayer && (GetTickCount() - g_remoteLastTick > 5000)) {
+    if (g_hasRemotePlayer.load() && (GetTickCount() - g_remoteLastTick.load() > 5000)) {
         Log("[NET-RX] Remote player timed out.");
-        g_hasRemotePlayer = false;
+        g_hasRemotePlayer.store(false);
     }
 
     IDirect3DVertexShader9* oldVS = nullptr;
@@ -622,12 +734,12 @@ void RenderCoopOverlay(IDirect3DDevice9* dev) {
     dev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
     // 1. Remote Player 3D Waypoint (Cyan)
-    if (g_hasRemotePlayer) {
-        Render3DMarker(dev, g_remoteX, g_remoteY, g_remoteZ + 1.8f, 0xEE00E5FF, 0xFFFFFFFF);
+    if (g_hasRemotePlayer.load()) {
+        Render3DMarker(dev, g_remoteX.load(), g_remoteY.load(), g_remoteZ.load() + 1.8f, 0xEE00E5FF, 0xFFFFFFFF);
     }
 
     // 2. Test Marker (Vibrant Lime Green: 0xEE00FF66)
-    if (g_testMarkerActive && g_testMarkerInitialized) {
+    if (g_testMarkerActive.load() && g_testMarkerInitialized.load()) {
         Render3DMarker(dev, g_testMarkerPos.x, g_testMarkerPos.y, g_testMarkerPos.z, 0xEE00FF66, 0xFFFFFFFF);
     }
 
@@ -654,6 +766,7 @@ typedef HRESULT (STDMETHODCALLTYPE *fn_Present)(IDirect3DDevice9*, const RECT*, 
 
 static fn_EndScene g_origEndScene = nullptr;
 static fn_Present  g_origPresent  = nullptr;
+static void** g_gameDeviceVTable = nullptr;
 static bool g_d3dHookActive = false;
 
 static bool g_wndProcHooked = false;
@@ -687,51 +800,74 @@ HRESULT STDMETHODCALLTYPE HookedPresent(IDirect3DDevice9* pDev, const RECT* pSrc
         }
     }
 
-    // 1. Ensure Lua callback is registered once Level/Script system is ready
-    if (!g_luaCallbacksRegistered) {
+    // 1. Ensure Lua callback is registered once Level/Script system is ready (atomic)
+    bool expected = false;
+    if (g_luaCallbacksRegistered.compare_exchange_strong(expected, true)) {
         void* L = GetLuaState();
         if (L) {
             g_RegisterLuaGlobal(nullptr, "OnBuddySpawned", (void*)&MyBuddySpawnedHandler);
-            g_luaCallbacksRegistered = true;
+            g_RegisterLuaGlobal(nullptr, "OnPlayerReport", (void*)&OnPlayerReportHandler);
+            g_RegisterLuaGlobal(nullptr, "ModLog", (void*)&ModLogHandler);
             Log("[LUA-INIT] Registered 'OnBuddySpawned' callback on render thread.");
         }
     }
 
-    // 2. Process synchronous spawn request (e.g. from F5 key)
-    if (g_reqSpawnBuddy) {
-        g_reqSpawnBuddy = false;
-        if (g_trackedPlayerAddr) {
+    // 2. Process synchronous spawn request (from F7/Num7 key)
+    if (g_reqSpawnBuddy.exchange(false)) {
+        uintptr_t addr = g_trackedPlayerAddr.load();
+        if (addr) {
             float cam[7]; SIZE_T br = 0;
-            if (ReadProcessMemory(GetCurrentProcess(), (LPCVOID)g_trackedPlayerAddr, cam, sizeof(cam), &br) && br == sizeof(cam)) {
-                float sx = cam[0] + cam[4] * 3.5f;
-                float sy = cam[1] + cam[5] * 3.5f;
-                float sz = cam[2] + cam[6] * 3.5f - 1.5f; // ground level
-                ExecuteSpawnBuddy(sx, sy, sz);
+            if (SafeReadPtr((void*)addr, sizeof(cam))) {
+                if (ReadProcessMemory(GetCurrentProcess(), (LPCVOID)addr, cam, sizeof(cam), &br) && br == sizeof(cam)) {
+                    // Use FLAT forward vector (ignore pitch) for horizontal positioning
+                    float fwdX = cam[4];
+                    float fwdY = cam[5];
+                    float fwdLen = sqrtf(fwdX*fwdX + fwdY*fwdY);
+                    if (fwdLen > 0.001f) {
+                        fwdX /= fwdLen;
+                        fwdY /= fwdLen;
+                    } else {
+                        fwdX = 1.0f; fwdY = 0.0f;
+                    }
+                    
+                    float sx = cam[0] + fwdX * 3.5f;
+                    float sy = cam[1] + fwdY * 3.5f;
+                    // Use camera height + small offset, will be corrected by game physics
+                    float sz = cam[2] + 1.0f;  
+                    ExecuteSpawnBuddy(sx, sy, sz);
+                }
+            } else {
+                Log("[SPAWN] Camera read failed!");
             }
         } else {
             Log("[SPAWN] Camera not tracked yet!");
         }
     }
 
-    // 3. Process synchronous teleport request (e.g. from F6 key)
-    if (g_reqTeleportBuddy) {
-        g_reqTeleportBuddy = false;
-        if (g_p2EntityPtr) {
-            SetEntityPositionAndRotation(g_p2EntityPtr, g_testMarkerPos.x, g_testMarkerPos.y, g_testMarkerPos.z - 1.5f);
-            Log("[TELEPORT] Moved Player 2 Buddy to marker position (%.1f, %.1f, %.1f)",
-                g_testMarkerPos.x, g_testMarkerPos.y, g_testMarkerPos.z - 1.5f);
+    // 3. Process synchronous teleport request (from F8/Num8/F6 key)
+    if (g_reqTeleportBuddy.exchange(false)) {
+        void* pEntity = g_p2EntityPtr.load();
+        if (pEntity) {
+            Vec3 pos = g_testMarkerPos;
+            pos.z -= 1.5f;
+            SetEntityPositionAndRotation(pEntity, pos.x, pos.y, pos.z);
+            Log("[TELEPORT] SUCCESS - Moved Player 2 Buddy to marker position (%.1f, %.1f, %.1f)",
+                pos.x, pos.y, pos.z);
         } else {
             Log("[TELEPORT] Buddy not spawned yet! Press [F7] first.");
         }
     }
 
     // 4. Live update Player 2 position if remote player is active
-    if (g_hasRemotePlayer) {
-        if (!g_p2BuddySpawned) {
+    if (g_hasRemotePlayer.load()) {
+        if (!g_p2BuddySpawned.load()) {
             // Auto-spawn buddy upon connecting
-            ExecuteSpawnBuddy(g_remoteX, g_remoteY, g_remoteZ - 1.8f);
-        } else if (g_p2EntityPtr) {
-            SetEntityPositionAndRotation(g_p2EntityPtr, g_remoteX, g_remoteY, g_remoteZ - 1.8f);
+            ExecuteSpawnBuddy(g_remoteX.load(), g_remoteY.load(), g_remoteZ.load() - 1.8f);
+        } else {
+            void* pEntity = g_p2EntityPtr.load();
+            if (pEntity) {
+                SetEntityPositionAndRotation(pEntity, g_remoteX.load(), g_remoteY.load(), g_remoteZ.load() - 1.8f);
+            }
         }
     }
 
@@ -740,8 +876,15 @@ HRESULT STDMETHODCALLTYPE HookedPresent(IDirect3DDevice9* pDev, const RECT* pSrc
 }
 
 bool SetupD3D9Hook() {
-    Log("[D3D9] Setting up Direct3D9 vtable hook...");
+    Log("[D3D9] Scanning for game's IDirect3DDevice9...");
 
+    // The game creates its device early. We need to find it by scanning memory
+    // for the IDirect3DDevice9 vtable pattern, or hook the first Present call.
+    // Better approach: scan for the device pointer in known locations.
+    
+    // For now, use the temporary device approach but with HARDWARE vertex processing
+    // to match the game's actual device type
+    
     HMODULE hD3D9 = GetModuleHandleA("d3d9.dll");
     if (!hD3D9) {
         hD3D9 = LoadLibraryA("d3d9.dll");
@@ -764,23 +907,41 @@ bool SetupD3D9Hook() {
         return false;
     }
 
+    // Get the game's window handle
+    HWND hGameWnd = FindWindowA(NULL, "Far Cry 2");
+    if (!hGameWnd) {
+        hGameWnd = FindWindowA("FarCry2", NULL);
+    }
+    
     WNDCLASSEXA wc = {};
     wc.cbSize = sizeof(wc);
     wc.lpfnWndProc = DefWindowProcA;
     wc.hInstance = GetModuleHandleA(NULL);
     wc.lpszClassName = "FC2CoopD3D";
     RegisterClassExA(&wc);
-    HWND hWnd = CreateWindowExA(0, "FC2CoopD3D", "", WS_POPUP, 0, 0, 100, 100, NULL, NULL, wc.hInstance, NULL);
+    HWND hWnd = hGameWnd ? hGameWnd : CreateWindowExA(0, "FC2CoopD3D", "", WS_POPUP, 0, 0, 100, 100, NULL, NULL, wc.hInstance, NULL);
 
     D3DPRESENT_PARAMETERS pp = {};
     pp.Windowed = TRUE;
     pp.SwapEffect = D3DSWAPEFFECT_DISCARD;
     pp.hDeviceWindow = hWnd;
     pp.BackBufferFormat = D3DFMT_UNKNOWN;
+    pp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
+    // Use HARDWARE vertex processing to match the game's actual device
     IDirect3DDevice9* pTmp = nullptr;
     HRESULT hr = pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd,
-                                     D3DCREATE_SOFTWARE_VERTEXPROCESSING, &pp, &pTmp);
+                                     D3DCREATE_HARDWARE_VERTEXPROCESSING, &pp, &pTmp);
+    if (FAILED(hr) || !pTmp) {
+        // Try mixed vertex processing
+        hr = pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd,
+                                 D3DCREATE_MIXED_VERTEXPROCESSING, &pp, &pTmp);
+    }
+    if (FAILED(hr) || !pTmp) {
+        // Try software as last resort
+        hr = pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd,
+                                 D3DCREATE_SOFTWARE_VERTEXPROCESSING, &pp, &pTmp);
+    }
     if (FAILED(hr) || !pTmp) {
         hr = pD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_NULLREF, hWnd,
                                  D3DCREATE_SOFTWARE_VERTEXPROCESSING, &pp, &pTmp);
@@ -788,7 +949,7 @@ bool SetupD3D9Hook() {
     if (FAILED(hr) || !pTmp) {
         Log("[D3D9] CreateDevice failed (hr: 0x%08X).", hr);
         pD3D->Release();
-        DestroyWindow(hWnd);
+        if (!hGameWnd) DestroyWindow(hWnd);
         UnregisterClassA("FC2CoopD3D", wc.hInstance);
         return false;
     }
@@ -797,6 +958,9 @@ bool SetupD3D9Hook() {
     g_origEndScene = (fn_EndScene)vtable[42];
     g_origPresent  = (fn_Present)vtable[17];
     Log("[D3D9] Original EndScene: 0x%08X | Present: 0x%08X", (DWORD)g_origEndScene, (DWORD)g_origPresent);
+
+    // Store the vtable for cleanup
+    g_gameDeviceVTable = vtable;
 
     DWORD oldProt;
     VirtualProtect(&vtable[42], sizeof(void*), PAGE_EXECUTE_READWRITE, &oldProt);
@@ -809,11 +973,11 @@ bool SetupD3D9Hook() {
 
     pTmp->Release();
     pD3D->Release();
-    DestroyWindow(hWnd);
+    if (!hGameWnd) DestroyWindow(hWnd);
     UnregisterClassA("FC2CoopD3D", wc.hInstance);
 
     g_d3dHookActive = true;
-    Log("[D3D9] Present hook active! Post-processing blur eliminated.");
+    Log("[D3D9] Present hook active!");
     return true;
 }
 
@@ -873,7 +1037,11 @@ DWORD WINAPI ReceiverThread(LPVOID) {
     }
     Log("[NET-RX] Listening for remote partner packets on UDP :%d", COOP_PORT_RX);
 
-    while (1) {
+    // Set socket to non-blocking for shutdown check
+    u_long mode = 1;
+    ioctlsocket(rxSock, FIONBIO, &mode);
+
+    while (!g_shutdownRequested.load()) {
         char buf[256];
         sockaddr_in from;
         int fromLen = sizeof(from);
@@ -881,17 +1049,24 @@ DWORD WINAPI ReceiverThread(LPVOID) {
         if (n >= (int)sizeof(CoopPacket)) {
             CoopPacket* p = (CoopPacket*)buf;
             if (p->magic == COOP_MAGIC && p->packetType == 1) {
-                g_remoteX = p->x;
-                g_remoteY = p->y;
-                g_remoteZ = p->z;
-                g_remoteLastTick = GetTickCount();
-                if (!g_hasRemotePlayer) {
+                g_remoteX.store(p->x);
+                g_remoteY.store(p->y);
+                g_remoteZ.store(p->z);
+                g_remoteLastTick.store(GetTickCount());
+                if (!g_hasRemotePlayer.exchange(true)) {
                     Log("[NET-RX] Remote Player connected at (%.1f, %.1f, %.1f)!", p->x, p->y, p->z);
-                    g_hasRemotePlayer = true;
                 }
+            }
+        } else if (n == SOCKET_ERROR) {
+            int err = WSAGetLastError();
+            if (err != WSAEWOULDBLOCK) {
+                Sleep(1); // Brief sleep on error
             }
         }
     }
+    
+    closesocket(rxSock);
+    Log("[NET-RX] Receiver thread stopped.");
     return 0;
 }
 
@@ -907,7 +1082,10 @@ DWORD WINAPI CoopThread(LPVOID) {
     Log("=================================================");
 
     InitNetworkSender();
-    CreateThread(NULL, 0, ReceiverThread, NULL, 0, NULL);
+    g_receiverThreadHandle = CreateThread(NULL, 0, ReceiverThread, NULL, 0, NULL);
+    if (!g_receiverThreadHandle) {
+        Log("[ERROR] Failed to create receiver thread!");
+    }
 
     HMODULE hDunia = NULL;
     for (int i = 0; i < 30 && !hDunia; i++) {
@@ -936,24 +1114,26 @@ DWORD WINAPI CoopThread(LPVOID) {
 
         bool f3 = (GetAsyncKeyState(VK_F3) & 0x8000) != 0;
         if (f3 && !f3d) {
-            g_trackingEnabled = !g_trackingEnabled;
-            Log("[TX] Transmission %s", g_trackingEnabled ? "RESUMED" : "PAUSED");
+            g_trackingEnabled.store(!g_trackingEnabled.load());
+            Log("[TX] Transmission %s", g_trackingEnabled.load() ? "RESUMED" : "PAUSED");
         }
         f3d = f3;
 
         bool f4 = (GetAsyncKeyState(VK_F4) & 0x8000) != 0;
         if (f4 && !f4d) {
-            if (!g_trackedPlayerAddr) AutoLocateCamera();
+            uintptr_t addr = g_trackedPlayerAddr.load();
+            if (!addr) AutoLocateCamera();
+            addr = g_trackedPlayerAddr.load();
 
-            if (g_trackedPlayerAddr) {
+            if (addr) {
                 float cam[7]; SIZE_T brRead;
-                if (ReadProcessMemory(GetCurrentProcess(), (LPCVOID)g_trackedPlayerAddr, cam, sizeof(cam), &brRead) && brRead == sizeof(cam)) {
+                if (ReadProcessMemory(GetCurrentProcess(), (LPCVOID)addr, cam, sizeof(cam), &brRead) && brRead == sizeof(cam)) {
                     if (IsValidCoord(cam[0], cam[1], cam[2])) {
                         g_testMarkerPos.x = cam[0] + cam[4] * 15.0f;
                         g_testMarkerPos.y = cam[1] + cam[5] * 15.0f;
                         g_testMarkerPos.z = cam[2] + cam[6] * 15.0f;
-                        g_testMarkerActive = true;
-                        g_testMarkerInitialized = true;
+                        g_testMarkerActive.store(true);
+                        g_testMarkerInitialized.store(true);
                         Log("[F4] Anchored 3D marker 15m ahead at (%.1f, %.1f, %.1f) from (%.1f, %.1f, %.1f)",
                             g_testMarkerPos.x, g_testMarkerPos.y, g_testMarkerPos.z, cam[0], cam[1], cam[2]);
                     } else {
@@ -969,16 +1149,16 @@ DWORD WINAPI CoopThread(LPVOID) {
         // [F7 / Num7] Spawn Buddy NPC 3.5m ahead of player (avoids F5 QuickSave conflict)
         bool f7 = ((GetAsyncKeyState(VK_F7) & 0x8000) != 0) || ((GetAsyncKeyState(VK_NUMPAD7) & 0x8000) != 0);
         if (f7 && !f7d) {
-            g_reqSpawnBuddy = true;
-            Log("[SPAWN-KEY] Spawn buddy requested (archetype: %s)", g_buddyArchetypes[g_selectedArchetypeIdx]);
+            g_reqSpawnBuddy.store(true);
+            Log("[SPAWN-KEY] Spawn buddy requested (archetype: %s)", g_buddyArchetypes[g_selectedArchetypeIdx.load()]);
         }
         f7d = f7;
 
         // [F8 / Num8 / F6] Teleport buddy to current marker position
         bool f8 = ((GetAsyncKeyState(VK_F8) & 0x8000) != 0) || ((GetAsyncKeyState(VK_NUMPAD8) & 0x8000) != 0) || ((GetAsyncKeyState(VK_F6) & 0x8000) != 0);
         if (f8 && !f8d) {
-            if (g_testMarkerInitialized) {
-                g_reqTeleportBuddy = true;
+            if (g_testMarkerInitialized.load()) {
+                g_reqTeleportBuddy.store(true);
                 Log("[TELEPORT-KEY] Teleport buddy requested to (%.1f, %.1f, %.1f)",
                     g_testMarkerPos.x, g_testMarkerPos.y, g_testMarkerPos.z);
             } else {
@@ -988,12 +1168,13 @@ DWORD WINAPI CoopThread(LPVOID) {
         f8d = f8;
 
         // Broadcast own position at 20 Hz
-        if (g_trackingEnabled && g_trackedPlayerAddr) {
+        if (g_trackingEnabled.load() && g_trackedPlayerAddr.load()) {
+            uintptr_t addr = g_trackedPlayerAddr.load();
             Vec3 lp; SIZE_T brRead;
-            if (ReadProcessMemory(GetCurrentProcess(), (LPCVOID)g_trackedPlayerAddr, &lp, sizeof(Vec3), &brRead) && brRead == sizeof(Vec3) && IsValidCoord(lp.x, lp.y, lp.z)) {
+            if (ReadProcessMemory(GetCurrentProcess(), (LPCVOID)addr, &lp, sizeof(Vec3), &brRead) && brRead == sizeof(Vec3) && IsValidCoord(lp.x, lp.y, lp.z)) {
                 SendPosition(lp.x, lp.y, lp.z);
                 if (tick % 100 == 0) {
-                    Log("[UDP TX #%u] Pos: (%.1f, %.1f, %.1f) -> Sent to UDP :%d", g_txSeq, lp.x, lp.y, lp.z, COOP_PORT_TX);
+                    Log("[UDP TX #%u] Pos: (%.1f, %.1f, %.1f) -> Sent to UDP :%d", g_txSeq.load(), lp.x, lp.y, lp.z, COOP_PORT_TX);
                 }
             }
         }
@@ -1096,10 +1277,57 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID) {
         Log("[INIT] binkw32 proxy attached (PID: %d)", GetCurrentProcessId());
         CreateThread(NULL, 0, CoopThread, NULL, 0, NULL);
     } else if (fdwReason == DLL_PROCESS_DETACH) {
-        Log("[SHUTDOWN] Proxy detaching.");
-        if (g_txSocket != INVALID_SOCKET) closesocket(g_txSocket);
+        Log("[SHUTDOWN] Proxy detaching - cleaning up...");
+        
+        // Signal shutdown to all threads
+        g_shutdownRequested.store(true);
+        
+        // Restore D3D9 vtable hooks
+        if (g_gameDeviceVTable && g_origPresent && g_origEndScene) {
+            DWORD oldProt;
+            VirtualProtect(&g_gameDeviceVTable[42], sizeof(void*), PAGE_EXECUTE_READWRITE, &oldProt);
+            g_gameDeviceVTable[42] = (void*)g_origEndScene;
+            VirtualProtect(&g_gameDeviceVTable[42], sizeof(void*), oldProt, &oldProt);
+            
+            VirtualProtect(&g_gameDeviceVTable[17], sizeof(void*), PAGE_EXECUTE_READWRITE, &oldProt);
+            g_gameDeviceVTable[17] = (void*)g_origPresent;
+            VirtualProtect(&g_gameDeviceVTable[17], sizeof(void*), oldProt, &oldProt);
+            Log("[SHUTDOWN] D3D9 hooks restored.");
+        }
+        
+        // Wait for receiver thread to finish
+        if (g_receiverThreadHandle) {
+            WaitForSingleObject(g_receiverThreadHandle, 2000);
+            CloseHandle(g_receiverThreadHandle);
+            g_receiverThreadHandle = NULL;
+        }
+        
+        // Cleanup networking
+        if (g_txSocket != INVALID_SOCKET) {
+            closesocket(g_txSocket);
+            g_txSocket = INVALID_SOCKET;
+        }
         WSACleanup();
-        if (g_logFile) { fclose(g_logFile); g_logFile = NULL; }
+        
+        // Restore window procedure
+        if (g_wndProcHooked && g_origWndProc) {
+            // Note: We don't have the window handle here, but the hook will be gone with D3D9 cleanup
+        }
+        
+        // Close log file
+        EnterCriticalSection(&g_cs);
+        if (g_logFile) { 
+            fclose(g_logFile); 
+            g_logFile = NULL; 
+        }
+        LeaveCriticalSection(&g_cs);
+        
+        if (g_csInitialized) {
+            DeleteCriticalSection(&g_cs);
+            g_csInitialized = false;
+        }
+        
+        Log("[SHUTDOWN] Cleanup complete.");
     }
     return TRUE;
 }
