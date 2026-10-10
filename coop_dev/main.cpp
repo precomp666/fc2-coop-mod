@@ -368,21 +368,6 @@ void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, floa
         return;
     }
 
-    // Validate function pointers in vtable (Dunia entity vtable layout)
-    // But we use global function pointers from fixed addresses
-    // Validate our function pointers point to executable memory
-    if (!SafeReadPtr((void*)g_InvalidateCache, 1) ||
-        !SafeReadPtr((void*)g_SetPosition, 1) ||
-        !SafeReadPtr((void*)g_SetRotation, 1)) {
-        Log("[SETPOS] Engine function pointers invalid!");
-        if (g_p2EntityPtr.load() == pEntity) {
-            g_p2BuddySpawned.store(false);
-            g_p2EntityPtr.store(nullptr);
-            g_p2EntityId.store(0);
-        }
-        return;
-    }
-
     // Check entity state - look for "deleted" or "dead" flags
     // Common Dunia entity offsets: 0x8=flags, 0xC=state, 0x10=type
     uint8_t* entityFlags = (uint8_t*)((uintptr_t)pEntity + 0x8);
@@ -399,19 +384,51 @@ void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, floa
         }
     }
 
-    // Try calling via entity's vtable directly (indices may vary)
-    // Dunia typically: InvalidateCache=8, SetPosition=12, SetRotation=13
-    // But safer to use our known function pointers with proper thiscall
+    // Call via entity's vtable directly - proper thiscall convention
+    // Dunia entity vtable: InvalidateCache=8, SetPosition=12, SetRotation=13
+    if (!SafeReadPtr(vtable, sizeof(void*) * 14)) {
+        Log("[SETPOS] Vtable too small for SetPosition/SetRotation");
+        if (g_p2EntityPtr.load() == pEntity) {
+            g_p2BuddySpawned.store(false);
+            g_p2EntityPtr.store(nullptr);
+            g_p2EntityId.store(0);
+        }
+        return;
+    }
+
+    // Get function pointers from vtable
+    typedef void (__thiscall *fn_InvalidateCache_vt)(void*);
+    typedef void (__thiscall *fn_SetPosition_vt)(void*, const Vec3*, uint32_t);
+    typedef void (__thiscall *fn_SetRotation_vt)(void*, const Vec3*, uint32_t);
+
+    fn_InvalidateCache_vt pInvalidateCache = (fn_InvalidateCache_vt)vtable[8];
+    fn_SetPosition_vt pSetPosition = (fn_SetPosition_vt)vtable[12];
+    fn_SetRotation_vt pSetRotation = (fn_SetRotation_vt)vtable[13];
+
+    // Validate vtable function pointers
+    if (!pInvalidateCache || !pSetPosition || !pSetRotation ||
+        !SafeReadPtr((void*)pInvalidateCache, 1) ||
+        !SafeReadPtr((void*)pSetPosition, 1) ||
+        !SafeReadPtr((void*)pSetRotation, 1)) {
+        Log("[SETPOS] Vtable function pointers invalid: IC=%p SP=%p SR=%p", 
+            pInvalidateCache, pSetPosition, pSetRotation);
+        if (g_p2EntityPtr.load() == pEntity) {
+            g_p2BuddySpawned.store(false);
+            g_p2EntityPtr.store(nullptr);
+            g_p2EntityId.store(0);
+        }
+        return;
+    }
 
     Vec3 pos = { x, y, z };
     Vec3 rot = { pitchRad, rollRad, yawRad };
 
-    Log("[SETPOS] Calling InvalidateCache on %p", pEntity);
-    g_InvalidateCache(pEntity);
-    Log("[SETPOS] Calling SetPosition on %p to (%.1f, %.1f, %.1f)", pEntity, x, y, z);
-    g_SetPosition(pEntity, &pos, 0);
-    Log("[SETPOS] Calling SetRotation on %p", pEntity);
-    g_SetRotation(pEntity, &rot, 0);
+    Log("[SETPOS] Calling InvalidateCache(vt[8]) on %p", pEntity);
+    pInvalidateCache(pEntity);
+    Log("[SETPOS] Calling SetPosition(vt[12]) on %p to (%.1f, %.1f, %.1f)", pEntity, x, y, z);
+    pSetPosition(pEntity, &pos, 0);
+    Log("[SETPOS] Calling SetRotation(vt[13]) on %p", pEntity);
+    pSetRotation(pEntity, &rot, 0);
     Log("[SETPOS] Success");
 }
 
