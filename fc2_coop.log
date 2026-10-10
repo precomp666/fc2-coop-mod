@@ -7452,3 +7452,412 @@
 [19:39:02] [TELEPORT] Attempting teleport to (3300.3, 1516.1, 15.3)
 [19:39:02] [SETPOS] Calling InvalidateCache on 18169840
 [19:39:02] [SETPOS] Calling SetPosition on 18169840 to (3300.3, 1516.1, 15.3)
+[19:42:30] [INIT] binkw32 proxy attached (PID: 344)
+[19:42:32] =================================================
+[19:42:32] Far Cry 2 Co-op Mod - Milestone 4: Entity Spawning
+[19:42:32] Keys: [F3] Toggle TX | [F4] Anchor Marker
+[19:42:32]        [F7 / Num7] Spawn Buddy | [F8 / Num8] Teleport Buddy
+[19:42:32] =================================================
+[19:42:32] [NET-TX] Broadcast sender ready on UDP :42069
+[19:42:32] [SUCCESS] Dunia.dll located at 0x10000000
+[19:42:32] [NET-RX] Listening for remote partner packets on UDP :42070
+[19:42:36] [D3D9] Scanning for game's IDirect3DDevice9...
+[19:42:36] [D3D9] Original EndScene: 0x79A4DD70 | Present: 0x79A4D9B0
+[19:42:36] [INPUT] Subclassed game window (0x000200A4) - system cursor suppressed!
+[19:42:36] [LUA-INIT] Registered 'OnBuddySpawned' callback on render thread.
+[19:42:36] [D3D9] Present hook active!
+[19:42:42] [CAMERA-LOCK] Active camera found at 0x04D79C6C: Pos (3317.3, 1518.6, 19.6) Screen 1152x720
+[19:42:42] [AUTO-INIT] Test marker placed 15m ahead at (3302.9, 1518.6, 15.2)
+[19:42:42] [STANCE] Going prone!
+[19:42:42] [ACTION TX] Synced to remote: flags=2 frame=0 time=0.05
+[19:42:42] [STANCE] Going prone!
+[19:42:42] [STANCE] Going prone!
+[19:42:42] [STANCE] Going prone!
+[19:42:42] [ACTION TX] Synced to remote: flags=0 frame=0 time=0.06
+[19:42:42] [STANCE] Going prone!
+[19:42:42] [STANCE] Going prone!
+[19:42:42] [STANCE] Going prone!
+[19:42:43] [STANCE] Going prone!
+[19:42:43] [CAMERA-LOCK] Active camera found at 0x04D79C6C: Pos (3317.3, 1518.6, 19.6) Screen 1152x720
+[19:42:43] [STANCE] Going prone!
+[19:42:43] [ACTION TX] Synced to remote: flags=2 frame=1 time=0.06
+[19:42:43] [STANCE] Going prone!
+[19:42:43] [STANCE] Going prone!
+[19:42:43] [STANCE] Going prone!
+[19:42:43] [STANCE] Going prone!
+[19:42:43] [STANCE] Going prone!
+[19:42:43] [ACTION TX] Synced to remote: flags=2 frame=1 time=0.07
+[19:42:43] [STANCE] Going prone!
+[19:42:43] [STANCE] Going prone!
+[19:42:43] [STANCE] Going prone!
+[19:42:43] [STANCE] Going prone!
+[19:42:43] [STANCE] Going prone!
+[19:42:43] [ACTION TX] Synced to remote: flags=2 frame=1 time=0.07
+[19:42:43] [STANCE] Going prone!
+[19:42:43] [STANCE] Going prone!
+[19:42:43] [STANCE] Going prone!
+[19:42:43] [ACTION TX] Synced to remote: flags=0 frame=1 time=0.07
+[19:42:43] [STANCE] Going prone!
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [ACTION TX] Synced to remote: flags=2 frame=1 time=0.08
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [ACTION TX] Synced to remote: flags=2 frame=1 time=0.09
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [ACTION TX] Synced to remote: flags=2 frame=1 time=0.09
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [ACTION TX] Synced to remote: flags=2 frame=1 time=0.10
+[19:42:44] [STANCE] Going prone!
+[19:42:44] [STANCE] Going prone!
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [UDP TX #46] Pos: (3317.3, 1518.6, 19.6) -> Sent to UDP :42069
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [ACTION TX] Synced to remote: flags=2 frame=1 time=0.10
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [ACTION TX] Synced to remote: flags=2 frame=1 time=0.10
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [ACTION TX] Synced to remote: flags=2 frame=1 time=0.11
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [STANCE] Going prone!
+[19:42:45] [ACTION TX] Synced to remote: flags=2 frame=1 time=0.12
+[19:42:45] [STANCE] Going prone!
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [CAMERA-LOCK] Active camera found at 0x04D79C6C: Pos (3317.3, 1518.6, 19.6) Screen 1152x720
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [ACTION TX] Synced to remote: flags=2 frame=2 time=0.12
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [ACTION TX] Synced to remote: flags=2 frame=2 time=0.12
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [ACTION TX] Synced to remote: flags=2 frame=2 time=0.13
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [STANCE] Going prone!
+[19:42:46] [ACTION TX] Synced to remote: flags=2 frame=2 time=0.14
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [ACTION TX] Synced to remote: flags=2 frame=2 time=0.14
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [ACTION TX] Synced to remote: flags=2 frame=2 time=0.14
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [ACTION TX] Synced to remote: flags=2 frame=2 time=0.15
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [STANCE] Going prone!
+[19:42:47] [ACTION TX] Synced to remote: flags=2 frame=2 time=0.15
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [ACTION TX] Synced to remote: flags=2 frame=2 time=0.16
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [WEAPON_FIRE] Weapon fired!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [ACTION TX] Synced to remote: flags=3 frame=2 time=0.17
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [ACTION TX] Synced to remote: flags=2 frame=2 time=0.17
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [STANCE] Going prone!
+[19:42:48] [ACTION TX] Synced to remote: flags=2 frame=2 time=0.17
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [CAMERA-LOCK] Active camera found at 0x04D79C6C: Pos (3317.3, 1518.6, 19.6) Screen 1152x720
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [ACTION TX] Synced to remote: flags=2 frame=3 time=0.18
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [ACTION TX] Synced to remote: flags=2 frame=3 time=0.18
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [ACTION TX] Synced to remote: flags=2 frame=3 time=0.19
+[19:42:49] [WEAPON_FIRE] Weapon fired!
+[19:42:49] [STANCE] Going prone!
+[19:42:49] [DEATH] Player died! Sending DEATH flag to remote.
+[19:42:49] [STANCE] Going prone!
+[19:42:50] [ACTION TX] Synced to remote: flags=0 frame=3 time=0.20
+[19:42:50] [REVIVE] Player revived! Resetting action flags.
+[19:42:50] [UDP TX #144] Pos: (3317.3, 1518.6, 19.7) -> Sent to UDP :42069
+[19:42:50] [STANCE] Going prone!
+[19:42:50] [ACTION TX] Synced to remote: flags=2 frame=3 time=0.20
+[19:42:50] [WEAPON_FIRE] Weapon fired!
+[19:42:50] [STANCE] Going prone!
+[19:42:50] [DEATH] Player died! Sending DEATH flag to remote.
+[19:42:50] [WEAPON_FIRE] Weapon fired!
+[19:42:50] [REVIVE] Player revived! Resetting action flags.
+[19:42:50] [DEATH] Player died! Sending DEATH flag to remote.
+[19:42:50] [STANCE] Going prone!
+[19:42:50] [ACTION TX] Synced to remote: flags=6 frame=3 time=0.20
+[19:42:50] [STANCE] Going prone!
+[19:42:50] [STANCE] Going prone!
+[19:42:50] [WEAPON_FIRE] Weapon fired!
+[19:42:50] [REVIVE] Player revived! Resetting action flags.
+[19:42:50] [ACTION TX] Synced to remote: flags=0 frame=3 time=0.21
+[19:42:50] [STANCE] Going prone!
+[19:42:50] [STANCE] Going prone!
+[19:42:50] [DEATH] Player died! Sending DEATH flag to remote.
+[19:42:50] [STANCE] Going prone!
+[19:42:50] [WEAPON_FIRE] Weapon fired!
+[19:42:51] [ACTION TX] Synced to remote: flags=0 frame=3 time=0.21
+[19:42:51] [WEAPON_FIRE] Weapon fired!
+[19:42:51] [STANCE] Going prone!
+[19:42:51] [STANCE] Going prone!
+[19:42:51] [STANCE] Going prone!
+[19:42:51] [ACTION TX] Synced to remote: flags=2 frame=3 time=0.22
+[19:42:51] [STANCE] Going prone!
+[19:42:51] [STANCE] Going prone!
+[19:42:51] [F4] Anchored 3D marker 15m ahead at (3300.0, 1516.1, 18.5) from (3314.9, 1517.8, 19.7)
+[19:42:51] [STANCE] Going prone!
+[19:42:51] [STANCE] Going prone!
+[19:42:51] [STANCE] Going prone!
+[19:42:51] [ACTION TX] Synced to remote: flags=2 frame=3 time=0.23
+[19:42:51] [STANCE] Going prone!
+[19:42:51] [STANCE] Going prone!
+[19:42:51] [STANCE] Going prone!
+[19:42:51] [STANCE] Going prone!
+[19:42:51] [ACTION TX] Synced to remote: flags=0 frame=3 time=0.23
+[19:42:51] [STANCE] Going prone!
+[19:42:51] [WEAPON_FIRE] Weapon fired!
+[19:42:51] [REVIVE] Player revived! Resetting action flags.
+[19:42:51] [STANCE] Going prone!
+[19:42:51] [DEATH] Player died! Sending DEATH flag to remote.
+[19:42:51] [STANCE] Going prone!
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [ACTION TX] Synced to remote: flags=2 frame=3 time=0.23
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [CAMERA-LOCK] Active camera found at 0x04D79C6C: Pos (3314.1, 1517.7, 19.7) Screen 1152x720
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [ACTION TX] Synced to remote: flags=2 frame=4 time=0.24
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [ACTION TX] Synced to remote: flags=2 frame=4 time=0.24
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [ACTION TX] Synced to remote: flags=2 frame=4 time=0.25
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [STANCE] Going prone!
+[19:42:52] [STANCE] Going prone!
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [ACTION TX] Synced to remote: flags=2 frame=4 time=0.26
+[19:42:53] [SPAWN-KEY] Spawn buddy requested (archetype: BUDDY_Hakim_Echebbi)
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [PLAYER-INFO] Local Player Archetype/Name is: 'player.MainCharacter.PawnPlayer.Marty_Alencar'
+[19:42:53] [SPAWN-TRY] Trying archetype 'player.MainCharacter.PawnPlayer.Marty_Alencar' at (3310.6, 1517.3, 20.7)...
+[19:42:53] [BUDDY-SPAWN] Received Valid Spawn ID: 13070920076296148992 (0xB5653C8E83275800)
+[19:42:53] [BUDDY-SPAWN] SUCCESS! CEntity pointer resolved: 0x181B9840
+[19:42:53] [SPAWN-SUCCESS] Archetype 'player.MainCharacter.PawnPlayer.Marty_Alencar' spawned successfully! EntityPtr=0x181B9840
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [ACTION TX] Synced to remote: flags=2 frame=4 time=0.26
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [ACTION TX] Synced to remote: flags=2 frame=4 time=0.27
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [ACTION TX] Synced to remote: flags=2 frame=4 time=0.27
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [STANCE] Going prone!
+[19:42:53] [STANCE] Going prone!
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [TELEPORT-KEY] Teleport buddy requested to (3300.0, 1516.1, 18.5)
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [ACTION TX] Synced to remote: flags=2 frame=4 time=0.28
+[19:42:54] [TELEPORT] Attempting teleport to (3300.0, 1516.1, 17.0)
+[19:42:54] [SETPOS] Vtable function pointers invalid: IC=104DDBE0 SP=104DDC20 SR=6E695343
+[19:42:54] [TELEPORT] SUCCESS - Moved Player 2 Buddy to marker position (3300.0, 1516.1, 17.0)
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [ACTION TX] Synced to remote: flags=2 frame=4 time=0.28
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [ACTION TX] Synced to remote: flags=2 frame=4 time=0.28
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [ACTION TX] Synced to remote: flags=2 frame=4 time=0.29
+[19:42:54] [STANCE] Going prone!
+[19:42:54] [STANCE] Going prone!
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [ACTION TX] Synced to remote: flags=2 frame=4 time=0.29
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [CAMERA-LOCK] Active camera found at 0x04D79C6C: Pos (3314.1, 1517.7, 19.7) Screen 1152x720
+[19:42:55] [UDP TX #244] Pos: (3314.1, 1517.7, 19.7) -> Sent to UDP :42069
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [ACTION TX] Synced to remote: flags=2 frame=5 time=0.30
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [TELEPORT-KEY] Teleport buddy requested to (3300.0, 1516.1, 18.5)
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [ACTION TX] Synced to remote: flags=2 frame=5 time=0.30
+[19:42:55] [TELEPORT] Buddy entity invalid or dead! Press [F7] to respawn.
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [ACTION TX] Synced to remote: flags=2 frame=5 time=0.31
+[19:42:55] [TELEPORT-KEY] Teleport buddy requested to (3300.0, 1516.1, 18.5)
+[19:42:55] [STANCE] Going prone!
+[19:42:55] [TELEPORT] Buddy entity invalid or dead! Press [F7] to respawn.
+[19:42:55] [STANCE] Going prone!
+[19:42:56] [REVIVE] Player revived! Resetting action flags.
+[19:42:56] [STANCE] Going prone!
+[19:42:56] [STANCE] Going prone!
+[19:42:56] [ACTION TX] Synced to remote: flags=2 frame=5 time=0.32
+[19:42:56] [STANCE] Going prone!
+[19:42:56] [TELEPORT-KEY] Teleport buddy requested to (3300.0, 1516.1, 18.5)
+[19:42:56] [WEAPON_FIRE] Weapon fired!
+[19:42:56] [TELEPORT] Buddy entity invalid or dead! Press [F7] to respawn.
+[19:42:56] [STANCE] Going prone!
+[19:42:56] [DEATH] Player died! Sending DEATH flag to remote.
+[19:42:56] [STANCE] Going prone!
+[19:42:56] [ACTION TX] Synced to remote: flags=0 frame=5 time=0.32
+[19:42:56] [TELEPORT-KEY] Teleport buddy requested to (3300.0, 1516.1, 18.5)
+[19:42:56] [STANCE] Going prone!
+[19:42:56] [TELEPORT] Buddy entity invalid or dead! Press [F7] to respawn.
+[19:42:56] [STANCE] Going prone!
+[19:42:56] [WEAPON_FIRE] Weapon fired!
+[19:42:56] [REVIVE] Player revived! Resetting action flags.
+[19:42:56] [DEATH] Player died! Sending DEATH flag to remote.
+[19:42:56] [REVIVE] Player revived! Resetting action flags.
+[19:42:56] [STANCE] Going prone!
+[19:42:56] [ACTION TX] Synced to remote: flags=2 frame=5 time=0.33
+[19:42:56] [STANCE] Going prone!
+[19:42:56] [TELEPORT-KEY] Teleport buddy requested to (3300.0, 1516.1, 18.5)
+[19:42:56] [WEAPON_FIRE] Weapon fired!
+[19:42:56] [DEATH] Player died! Sending DEATH flag to remote.
+[19:42:56] [STANCE] Going prone!
+[19:42:56] [TELEPORT] Buddy entity invalid or dead! Press [F7] to respawn.
+[19:42:56] [REVIVE] Player revived! Resetting action flags.
+[19:42:56] [DEATH] Player died! Sending DEATH flag to remote.
+[19:42:56] [STANCE] Going prone!
+[19:42:56] [REVIVE] Player revived! Resetting action flags.
+[19:42:56] [ACTION TX] Synced to remote: flags=0 frame=5 time=0.33
+[19:42:56] [TELEPORT-KEY] Teleport buddy requested to (3300.0, 1516.1, 18.5)
+[19:42:56] [WEAPON_FIRE] Weapon fired!
+[19:42:56] [TELEPORT] Buddy entity invalid or dead! Press [F7] to respawn.
+[19:42:57] [ACTION TX] Synced to remote: flags=0 frame=5 time=0.34
+[19:42:57] [TELEPORT-KEY] Teleport buddy requested to (3300.0, 1516.1, 18.5)
+[19:42:57] [TELEPORT] Buddy entity invalid or dead! Press [F7] to respawn.
+[19:42:57] [TELEPORT-KEY] Teleport buddy requested to (3300.0, 1516.1, 18.5)
+[19:42:57] [TELEPORT] Buddy entity invalid or dead! Press [F7] to respawn.
+[19:42:57] [ACTION TX] Synced to remote: flags=0 frame=5 time=0.34
+[19:42:57] [TELEPORT-KEY] Teleport buddy requested to (3300.0, 1516.1, 18.5)
+[19:42:57] [TELEPORT] Buddy entity invalid or dead! Press [F7] to respawn.
+[19:42:57] [ACTION TX] Synced to remote: flags=0 frame=5 time=0.34
+[19:42:57] [TELEPORT-KEY] Teleport buddy requested to (3300.0, 1516.1, 18.5)
+[19:42:57] [TELEPORT] Buddy entity invalid or dead! Press [F7] to respawn.
+[19:42:57] [TELEPORT-KEY] Teleport buddy requested to (3300.0, 1516.1, 18.5)
+[19:42:57] [ACTION TX] Synced to remote: flags=0 frame=5 time=0.35
+[19:42:57] [TELEPORT] Buddy entity invalid or dead! Press [F7] to respawn.
+[19:42:58] [ACTION TX] Synced to remote: flags=0 frame=5 time=0.35
+[19:42:58] [CAMERA-LOCK] Active camera found at 0x04D79C6C: Pos (3313.7, 1519.1, 19.7) Screen 1152x720
+[19:42:58] [ACTION TX] Synced to remote: flags=0 frame=6 time=0.36
+[19:42:58] [ACTION TX] Synced to remote: flags=0 frame=6 time=0.36
+[19:42:58] [SPAWN-KEY] Spawn buddy requested (archetype: BUDDY_Hakim_Echebbi)
+[19:42:58] [SPAWN-TRY] Trying archetype 'player.MainCharacter.PawnPlayer.Marty_Alencar' at (3310.2, 1518.7, 20.7)...
+[19:42:58] [BUDDY-SPAWN] Received Valid Spawn ID: 13070920087033587968 (0xB5653C910327A900)
+[19:42:58] [BUDDY-SPAWN] SUCCESS! CEntity pointer resolved: 0x19AE0460
+[19:42:58] [SPAWN-SUCCESS] Archetype 'player.MainCharacter.PawnPlayer.Marty_Alencar' spawned successfully! EntityPtr=0x19AE0460
+[19:42:58] [ACTION TX] Synced to remote: flags=0 frame=6 time=0.37
+[19:42:59] [ACTION TX] Synced to remote: flags=0 frame=6 time=0.38
+[19:42:59] [ACTION TX] Synced to remote: flags=0 frame=6 time=0.38
+[19:42:59] [ACTION TX] Synced to remote: flags=0 frame=6 time=0.39
+[19:42:59] [SPAWN-KEY] Spawn buddy requested (archetype: BUDDY_Hakim_Echebbi)

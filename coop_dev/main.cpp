@@ -410,8 +410,8 @@ void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, floa
         !SafeReadPtr((void*)pInvalidateCache, 1) ||
         !SafeReadPtr((void*)pSetPosition, 1) ||
         !SafeReadPtr((void*)pSetRotation, 1)) {
-        Log("[SETPOS] Vtable function pointers invalid: IC=%p SP=%p SR=%p", 
-            pInvalidateCache, pSetPosition, pSetRotation);
+        Log("[SETPOS] Vtable function pointers invalid: IC=%p SP=%p SR=%p vt[8]=%p vt[12]=%p vt[13]=%p", 
+            pInvalidateCache, pSetPosition, pSetRotation, vtable[8], vtable[12], vtable[13]);
         if (g_p2EntityPtr.load() == pEntity) {
             g_p2BuddySpawned.store(false);
             g_p2EntityPtr.store(nullptr);
@@ -423,11 +423,11 @@ void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, floa
     Vec3 pos = { x, y, z };
     Vec3 rot = { pitchRad, rollRad, yawRad };
 
-    Log("[SETPOS] Calling InvalidateCache(vt[8]) on %p", pEntity);
+    Log("[SETPOS] Calling InvalidateCache(vt[8]=%p) on %p", pInvalidateCache, pEntity);
     pInvalidateCache(pEntity);
-    Log("[SETPOS] Calling SetPosition(vt[12]) on %p to (%.1f, %.1f, %.1f)", pEntity, x, y, z);
+    Log("[SETPOS] Calling SetPosition(vt[12]=%p) on %p to (%.1f, %.1f, %.1f)", pSetPosition, pEntity, x, y, z);
     pSetPosition(pEntity, &pos, 0);
-    Log("[SETPOS] Calling SetRotation(vt[13]) on %p", pEntity);
+    Log("[SETPOS] Calling SetRotation(vt[13]=%p) on %p", pSetRotation, pEntity);
     pSetRotation(pEntity, &rot, 0);
     Log("[SETPOS] Success");
 }
