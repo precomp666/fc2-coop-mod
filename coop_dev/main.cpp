@@ -351,6 +351,7 @@ void ExecuteSpawnBuddy(float x, float y, float z) {
     }
 }
 void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, float pitchRad = 0, float rollRad = 0, float yawRad = 0) {
+    if (!pEntity || !SafeReadPtr(pEntity, 0x100)) return;
 
     Vec3 pos = { x, y, z };
     Vec3 rot = { pitchRad, rollRad, yawRad };
@@ -847,14 +848,17 @@ HRESULT STDMETHODCALLTYPE HookedPresent(IDirect3DDevice9* pDev, const RECT* pSrc
     // 3. Process synchronous teleport request (from F8/Num8/F6 key)
     if (g_reqTeleportBuddy.exchange(false)) {
         void* pEntity = g_p2EntityPtr.load();
-        if (pEntity) {
+        if (pEntity && SafeReadPtr(pEntity, 0x100)) {
             Vec3 pos = g_testMarkerPos;
             pos.z -= 1.5f;
             SetEntityPositionAndRotation(pEntity, pos.x, pos.y, pos.z);
             Log("[TELEPORT] SUCCESS - Moved Player 2 Buddy to marker position (%.1f, %.1f, %.1f)",
                 pos.x, pos.y, pos.z);
         } else {
-            Log("[TELEPORT] Buddy not spawned yet! Press [F7] first.");
+            Log("[TELEPORT] Buddy entity invalid or dead! Press [F7] to respawn.");
+            g_p2BuddySpawned.store(false);
+            g_p2EntityPtr.store(nullptr);
+            g_p2EntityId.store(0);
         }
     }
 
@@ -865,8 +869,13 @@ HRESULT STDMETHODCALLTYPE HookedPresent(IDirect3DDevice9* pDev, const RECT* pSrc
             ExecuteSpawnBuddy(g_remoteX.load(), g_remoteY.load(), g_remoteZ.load() - 1.8f);
         } else {
             void* pEntity = g_p2EntityPtr.load();
-            if (pEntity) {
+            if (pEntity && SafeReadPtr(pEntity, 0x100)) {
                 SetEntityPositionAndRotation(pEntity, g_remoteX.load(), g_remoteY.load(), g_remoteZ.load() - 1.8f);
+            } else {
+                // Entity became invalid, reset state
+                g_p2BuddySpawned.store(false);
+                g_p2EntityPtr.store(nullptr);
+                g_p2EntityId.store(0);
             }
         }
     }
@@ -1195,10 +1204,11 @@ DWORD WINAPI CoopThread(LPVOID) {
         }
 
         // Check for weapon fire event
-        static volatile bool g_lastWasFiring = false;
-        static volatile bool g_isDead = false;
-        if (g_trackedPlayerAddr) {
-            uint8_t* pFlags = (uint8_t*)g_trackedPlayerAddr;  // Byte pointer for flag bits
+        static bool g_lastWasFiring = false;
+        static bool g_isDead = false;
+        uintptr_t addr = g_trackedPlayerAddr.load();
+        if (addr) {
+            uint8_t* pFlags = (uint8_t*)addr;  // Byte pointer for flag bits
             bool currentlyFiring = (*pFlags & 0x01) != 0;  // Check weapon fire flag
             bool isCrouching = (*pFlags & 0x02) != 0;      // Check crouch flag
             if (currentlyFiring && !g_lastWasFiring) {
