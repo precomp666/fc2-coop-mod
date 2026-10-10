@@ -458,18 +458,6 @@ void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, floa
     Vec3 pos = { x, y, z };
     Vec3 rot = { pitchRad, rollRad, yawRad };
 
-    // Check entity type - verify it's a pawn/character that supports position changes
-    // Dunia pawn entities typically have type info at offset 0x10 or 0x14
-    uint32_t* entityType = (uint32_t*)((uintptr_t)pEntity + 0x10);
-    if (SafeReadPtr(entityType, sizeof(uint32_t))) {
-        Log("[SETPOS] Entity type at +0x10: 0x%08X", *entityType);
-    }
-    entityType = (uint32_t*)((uintptr_t)pEntity + 0x14);
-    if (SafeReadPtr(entityType, sizeof(uint32_t))) {
-        Log("[SETPOS] Entity type at +0x14: 0x%08X", *entityType);
-    }
-
-    // Try vtable functions first (since we found a valid layout)
     Log("[SETPOS] Calling InvalidateCache(vt[8]=%p) on %p", pInvalidateCache, pEntity);
     pInvalidateCache(pEntity);
     Log("[SETPOS] Calling SetPosition(vt[12]=%p) on %p to (%.1f, %.1f, %.1f)", pSetPosition, pEntity, x, y, z);
@@ -477,22 +465,6 @@ void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, floa
     Log("[SETPOS] Calling SetRotation(vt[13]=%p) on %p", pSetRotation, pEntity);
     pSetRotation(pEntity, &rot, 0);
     Log("[SETPOS] Success");
-    return;
-
-    // Global function fallback (disabled - vtable works)
-    /*
-    if (SafeReadPtr((void*)g_SetPosition, 1) && SafeReadPtr((void*)g_InvalidateCache, 1)) {
-        Log("[SETPOS] Trying global function pointers as fallback...");
-        Log("[SETPOS] Calling global InvalidateCache(%p)", pEntity);
-        g_InvalidateCache(pEntity);
-        Log("[SETPOS] Calling global SetPosition(%p) to (%.1f, %.1f, %.1f)", pEntity, x, y, z);
-        g_SetPosition(pEntity, &pos, 0);
-        Log("[SETPOS] Calling global SetRotation(%p)", pEntity);
-        g_SetRotation(pEntity, &rot, 0);
-        Log("[SETPOS] Global functions Success");
-        return;
-    }
-    */
 }
 
 bool IsValidCoord(float x, float y, float z) {
