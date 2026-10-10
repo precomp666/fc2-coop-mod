@@ -368,6 +368,22 @@ void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, floa
         return;
     }
 
+    // Validate function pointers in vtable (Dunia entity vtable layout)
+    // Typical indices: InvalidateCache ~8, SetPosition ~12, SetRotation ~13
+    // But we use global function pointers from fixed addresses
+    // Validate our function pointers point to executable memory
+    if (!SafeReadPtr((void*)g_InvalidateCache, 1) ||
+        !SafeReadPtr((void*)g_SetPosition, 1) ||
+        !SafeReadPtr((void*)g_SetRotation, 1)) {
+        Log("[SETPOS] Engine function pointers invalid!");
+        if (g_p2EntityPtr.load() == pEntity) {
+            g_p2BuddySpawned.store(false);
+            g_p2EntityPtr.store(nullptr);
+            g_p2EntityId.store(0);
+        }
+        return;
+    }
+
     Vec3 pos = { x, y, z };
     Vec3 rot = { pitchRad, rollRad, yawRad };
 
