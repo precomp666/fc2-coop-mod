@@ -358,7 +358,7 @@ void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, floa
 
     // Additional validation: check if entity vtable is valid
     void** vtable = *(void***)pEntity;
-    if (!vtable || !SafeReadPtr(vtable, sizeof(void*) * 10)) {
+    if (!vtable || !SafeReadPtr(vtable, sizeof(void*) * 20)) {
         Log("[SETPOS] Entity vtable invalid: %p", pEntity);
         if (g_p2EntityPtr.load() == pEntity) {
             g_p2BuddySpawned.store(false);
@@ -369,7 +369,6 @@ void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, floa
     }
 
     // Validate function pointers in vtable (Dunia entity vtable layout)
-    // Typical indices: InvalidateCache ~8, SetPosition ~12, SetRotation ~13
     // But we use global function pointers from fixed addresses
     // Validate our function pointers point to executable memory
     if (!SafeReadPtr((void*)g_InvalidateCache, 1) ||
@@ -383,6 +382,26 @@ void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, floa
         }
         return;
     }
+
+    // Check entity state - look for "deleted" or "dead" flags
+    // Common Dunia entity offsets: 0x8=flags, 0xC=state, 0x10=type
+    uint8_t* entityFlags = (uint8_t*)((uintptr_t)pEntity + 0x8);
+    if (SafeReadPtr(entityFlags, 1)) {
+        uint8_t flags = *entityFlags;
+        if (flags & 0x80) { // Common "deleted" flag
+            Log("[SETPOS] Entity marked as deleted (flags=0x%02X), cleaning up", flags);
+            if (g_p2EntityPtr.load() == pEntity) {
+                g_p2BuddySpawned.store(false);
+                g_p2EntityPtr.store(nullptr);
+                g_p2EntityId.store(0);
+            }
+            return;
+        }
+    }
+
+    // Try calling via entity's vtable directly (indices may vary)
+    // Dunia typically: InvalidateCache=8, SetPosition=12, SetRotation=13
+    // But safer to use our known function pointers with proper thiscall
 
     Vec3 pos = { x, y, z };
     Vec3 rot = { pitchRad, rollRad, yawRad };
