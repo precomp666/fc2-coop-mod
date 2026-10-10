@@ -469,8 +469,18 @@ void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, floa
         Log("[SETPOS] Entity type at +0x14: 0x%08X", *entityType);
     }
 
-    // Also try global function pointers with proper thiscall convention as fallback
-    // These are the engine's global entity manipulation functions
+    // Try vtable functions first (since we found a valid layout)
+    Log("[SETPOS] Calling InvalidateCache(vt[8]=%p) on %p", pInvalidateCache, pEntity);
+    pInvalidateCache(pEntity);
+    Log("[SETPOS] Calling SetPosition(vt[12]=%p) on %p to (%.1f, %.1f, %.1f)", pSetPosition, pEntity, x, y, z);
+    pSetPosition(pEntity, &pos, 0);
+    Log("[SETPOS] Calling SetRotation(vt[13]=%p) on %p", pSetRotation, pEntity);
+    pSetRotation(pEntity, &rot, 0);
+    Log("[SETPOS] Success");
+    return;
+
+    // Global function fallback (disabled - vtable works)
+    /*
     if (SafeReadPtr((void*)g_SetPosition, 1) && SafeReadPtr((void*)g_InvalidateCache, 1)) {
         Log("[SETPOS] Trying global function pointers as fallback...");
         Log("[SETPOS] Calling global InvalidateCache(%p)", pEntity);
@@ -482,14 +492,7 @@ void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, floa
         Log("[SETPOS] Global functions Success");
         return;
     }
-
-    Log("[SETPOS] Calling InvalidateCache(vt[8]=%p) on %p", pInvalidateCache, pEntity);
-    pInvalidateCache(pEntity);
-    Log("[SETPOS] Calling SetPosition(vt[12]=%p) on %p to (%.1f, %.1f, %.1f)", pSetPosition, pEntity, x, y, z);
-    pSetPosition(pEntity, &pos, 0);
-    Log("[SETPOS] Calling SetRotation(vt[13]=%p) on %p", pSetRotation, pEntity);
-    pSetRotation(pEntity, &rot, 0);
-    Log("[SETPOS] Success");
+    */
 }
 
 bool IsValidCoord(float x, float y, float z) {
