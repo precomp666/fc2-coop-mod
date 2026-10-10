@@ -17,7 +17,7 @@ done
 
 COMPILER="i686-w64-mingw32-g++"
 if ! command -v "$COMPILER" &> /dev/null; then
-    COMPILER="i686-w64-mingw32-clang++"
+    COMPILER="i686-w64-mingw32-g++"
 fi
 
 if ! command -v "$COMPILER" &> /dev/null; then

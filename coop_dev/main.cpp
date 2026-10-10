@@ -351,14 +351,33 @@ void ExecuteSpawnBuddy(float x, float y, float z) {
     }
 }
 void SetEntityPositionAndRotation(void* pEntity, float x, float y, float z, float pitchRad = 0, float rollRad = 0, float yawRad = 0) {
-    if (!pEntity || !SafeReadPtr(pEntity, 0x100)) return;
+    if (!pEntity || !SafeReadPtr(pEntity, 0x100)) {
+        Log("[SETPOS] Invalid entity pointer: %p", pEntity);
+        return;
+    }
+
+    // Additional validation: check if entity vtable is valid
+    void** vtable = *(void***)pEntity;
+    if (!vtable || !SafeReadPtr(vtable, sizeof(void*) * 10)) {
+        Log("[SETPOS] Entity vtable invalid: %p", pEntity);
+        if (g_p2EntityPtr.load() == pEntity) {
+            g_p2BuddySpawned.store(false);
+            g_p2EntityPtr.store(nullptr);
+            g_p2EntityId.store(0);
+        }
+        return;
+    }
 
     Vec3 pos = { x, y, z };
     Vec3 rot = { pitchRad, rollRad, yawRad };
 
+    Log("[SETPOS] Calling InvalidateCache on %p", pEntity);
     g_InvalidateCache(pEntity);
+    Log("[SETPOS] Calling SetPosition on %p to (%.1f, %.1f, %.1f)", pEntity, x, y, z);
     g_SetPosition(pEntity, &pos, 0);
+    Log("[SETPOS] Calling SetRotation on %p", pEntity);
     g_SetRotation(pEntity, &rot, 0);
+    Log("[SETPOS] Success");
 }
 
 bool IsValidCoord(float x, float y, float z) {
@@ -851,6 +870,7 @@ HRESULT STDMETHODCALLTYPE HookedPresent(IDirect3DDevice9* pDev, const RECT* pSrc
         if (pEntity && SafeReadPtr(pEntity, 0x100)) {
             Vec3 pos = g_testMarkerPos;
             pos.z -= 1.5f;
+            Log("[TELEPORT] Attempting teleport to (%.1f, %.1f, %.1f)", pos.x, pos.y, pos.z);
             SetEntityPositionAndRotation(pEntity, pos.x, pos.y, pos.z);
             Log("[TELEPORT] SUCCESS - Moved Player 2 Buddy to marker position (%.1f, %.1f, %.1f)",
                 pos.x, pos.y, pos.z);
